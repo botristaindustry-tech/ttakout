@@ -49,7 +49,7 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || 'mock',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'mock',
-    callbackURL: 'http://localhost:5005/auth/google/callback'
+    callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5005'}/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, cb) => {
     try {
