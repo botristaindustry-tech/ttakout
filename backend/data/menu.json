@@ -1,47 +1,1316 @@
-[
-  {
-    "itemId": "rice_chicken",
-    "name": "Chicken over Rice",
-    "price": 10.99,
-    "description": "Grilled marinated chicken served over basmati rice with a side salad and white sauce.",
-    "availability": "in-stock"
+{
+  "restaurant": {
+    "name": "Halal N Out",
+    "currency": "USD"
   },
-  {
-    "itemId": "seafood_jumbo_shrimp_6",
-    "name": "Jumbo Shrimp (6 Pcs.)",
-    "price": 6.99,
-    "description": "Crispy fried jumbo shrimp.",
-    "availability": "in-stock"
-  },
-  {
-    "itemId": "wings_boneless_6",
-    "name": "Boneless Wings (6 Pcs.)",
-    "price": 6.99,
-    "description": "Six pieces of boneless chicken wings.",
-    "options": [
-      {
-        "name": "Wing Sauce",
-        "choices": [
-          {"name": "Honey Mustard", "price": 0},
-          {"name": "BBQ", "price": 0},
-          {"name": "Hot Buffalo", "price": 0}
-        ]
-      }
-    ],
-    "availability": "in-stock"
-  },
-  {
-    "itemId": "burger_special",
-    "name": "Terrace Special Burger",
-    "price": 15.99,
-    "description": "Double patty, house sauce, cheddar, lettuce, tomato.",
-    "availability": "in-stock"
-  },
-  {
-    "itemId": "gyro_lamb",
-    "name": "Lamb Gyro Pita",
-    "price": 8.99,
-    "description": "Classic lamb gyro meat wrapped in pita with tzatziki, lettuce, and tomatoes.",
-    "availability": "in-stock"
-  }
-]
+  "pickupEtaMinutesDefault": 20,
+  "categories": [
+    {
+      "name": "WILD OUT COMBOS",
+      "items": [
+        {
+          "id": "combo_cheese_burger",
+          "name": "Cheese Burger",
+          "price": 5.99,
+          "description": "Mayo, Lettuce, Ketchup, Pickle, Onion & Tomato",
+          "modifiers": [
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "combo_bacon_cheese_burger",
+          "name": "Bacon Cheese Burger",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "combo_grilled_chicken_sandwich",
+          "name": "Grilled Chicken Sandwich",
+          "price": 6.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "combo_double_cheese_burger",
+          "name": "Double Cheese Burger",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "combo_zinger_chicken_sandwich",
+          "name": "Zinger Chicken Sandwich",
+          "price": 6.99,
+          "description": "(Spicy or Regular)",
+          "modifiers": [
+            {
+              "id": "mod_zinger_flavor",
+              "name": "Flavor",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_spicy", "name": "Spicy", "price": 0 },
+                { "id": "opt_regular", "name": "Regular", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "combo_veggie_burger",
+          "name": "Veggie Burger",
+          "price": 5.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "combo_fish_sandwich",
+          "name": "Fish Sandwich",
+          "price": 5.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_combos",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HEROS",
+      "items": [
+        {
+          "id": "hero_grilled_chicken",
+          "name": "Grilled Chicken Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero_philly_cheese_steak",
+          "name": "Philly Cheese Steak Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero_chopped_cheese",
+          "name": "Chopped Cheese Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero_chicken_cheese_steak",
+          "name": "Chicken Cheese Steak Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero_italian_cheese_burger",
+          "name": "Italian Cheese Burger Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero_fish_on_hero",
+          "name": "Fish on Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero_zinger_hero",
+          "name": "Zinger Hero",
+          "price": 9.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_heros",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PITA",
+      "items": [
+        {
+          "id": "pita_lamb_gyro",
+          "name": "Lamb Gyro on Pita",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_pita",
+              "name": "Make it combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pita_chicken_gyro",
+          "name": "Chicken Gyro on Pita",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_pita",
+              "name": "Make it combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pita_mix",
+          "name": "Mix (Chicken & Lamb)",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_pita",
+              "name": "Make it combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pita_falafel",
+          "name": "Falafel on Pita",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_pita",
+              "name": "Make it combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pita_chicken_kofta_kabab",
+          "name": "Chicken Kofta Kabab",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_pita",
+              "name": "Make it combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CHICKEN TENDERS",
+      "items": [
+        {
+          "id": "tenders_2pcs",
+          "name": "2 Pcs. Chicken Tenders",
+          "price": 4.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_tenders",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tenders_4pcs",
+          "name": "4 Pcs. Chicken Tenders",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_tenders",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tenders_6pcs",
+          "name": "6 Pcs. Chicken Tenders",
+          "price": 12.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_tenders",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BEVERAGES",
+      "items": [
+        {
+          "id": "bev_cans_water",
+          "name": "All Cans & Bottle Water",
+          "price": 1.49
+        },
+        {
+          "id": "bev_bottles_gatorade_snapple",
+          "name": "All Bottles, Gatorade and Snapple",
+          "price": 2.49
+        }
+      ]
+    },
+    {
+      "name": "HERSHEY'S ICE CREAM",
+      "items": [
+        {
+          "id": "ice_cream_1_scoop",
+          "name": "1 Scoop Cone",
+          "price": 2.99,
+          "modifiers": [
+            {
+              "id": "mod_ice_cream_flavor",
+              "name": "Flavor",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_ic_vanilla", "name": "Vanilla", "price": 0 },
+                { "id": "opt_ic_chocolate", "name": "Chocolate", "price": 0 },
+                { "id": "opt_ic_cookies", "name": "Cookies N Cream", "price": 0 },
+                { "id": "opt_ic_butter_pecan", "name": "Butter Pecan", "price": 0 },
+                { "id": "opt_ic_birthday_cake", "name": "Birthday Cake", "price": 0 },
+                { "id": "opt_ic_strawberry", "name": "Strawberry", "price": 0 },
+                { "id": "opt_ic_strawberry_cheese", "name": "Strawberry Cheese Cake", "price": 0 },
+                { "id": "opt_ic_banana", "name": "Banana Pudding", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ice_cream_2_scoop",
+          "name": "2 Scoop Cone",
+          "price": 4.99,
+          "modifiers": [
+            {
+              "id": "mod_ice_cream_flavor_2",
+              "name": "Flavors",
+              "type": "multiple",
+              "minSelections": 1,
+              "maxSelections": 2,
+              "options": [
+                { "id": "opt_ic_vanilla", "name": "Vanilla", "price": 0 },
+                { "id": "opt_ic_chocolate", "name": "Chocolate", "price": 0 },
+                { "id": "opt_ic_cookies", "name": "Cookies N Cream", "price": 0 },
+                { "id": "opt_ic_butter_pecan", "name": "Butter Pecan", "price": 0 },
+                { "id": "opt_ic_birthday_cake", "name": "Birthday Cake", "price": 0 },
+                { "id": "opt_ic_strawberry", "name": "Strawberry", "price": 0 },
+                { "id": "opt_ic_strawberry_cheese", "name": "Strawberry Cheese Cake", "price": 0 },
+                { "id": "opt_ic_banana", "name": "Banana Pudding", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ice_cream_sm",
+          "name": "Sm. Ice Cream",
+          "price": 3.99,
+          "modifiers": [
+            {
+              "id": "mod_ice_cream_flavor",
+              "name": "Flavor",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_ic_vanilla", "name": "Vanilla", "price": 0 },
+                { "id": "opt_ic_chocolate", "name": "Chocolate", "price": 0 },
+                { "id": "opt_ic_cookies", "name": "Cookies N Cream", "price": 0 },
+                { "id": "opt_ic_butter_pecan", "name": "Butter Pecan", "price": 0 },
+                { "id": "opt_ic_birthday_cake", "name": "Birthday Cake", "price": 0 },
+                { "id": "opt_ic_strawberry", "name": "Strawberry", "price": 0 },
+                { "id": "opt_ic_strawberry_cheese", "name": "Strawberry Cheese Cake", "price": 0 },
+                { "id": "opt_ic_banana", "name": "Banana Pudding", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ice_cream_med",
+          "name": "Med. Ice Cream",
+          "price": 5.99,
+          "modifiers": [
+            {
+              "id": "mod_ice_cream_flavor",
+              "name": "Flavor",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_ic_vanilla", "name": "Vanilla", "price": 0 },
+                { "id": "opt_ic_chocolate", "name": "Chocolate", "price": 0 },
+                { "id": "opt_ic_cookies", "name": "Cookies N Cream", "price": 0 },
+                { "id": "opt_ic_butter_pecan", "name": "Butter Pecan", "price": 0 },
+                { "id": "opt_ic_birthday_cake", "name": "Birthday Cake", "price": 0 },
+                { "id": "opt_ic_strawberry", "name": "Strawberry", "price": 0 },
+                { "id": "opt_ic_strawberry_cheese", "name": "Strawberry Cheese Cake", "price": 0 },
+                { "id": "opt_ic_banana", "name": "Banana Pudding", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ice_cream_lg",
+          "name": "LG. Ice Cream",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_ice_cream_flavor",
+              "name": "Flavor",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_ic_vanilla", "name": "Vanilla", "price": 0 },
+                { "id": "opt_ic_chocolate", "name": "Chocolate", "price": 0 },
+                { "id": "opt_ic_cookies", "name": "Cookies N Cream", "price": 0 },
+                { "id": "opt_ic_butter_pecan", "name": "Butter Pecan", "price": 0 },
+                { "id": "opt_ic_birthday_cake", "name": "Birthday Cake", "price": 0 },
+                { "id": "opt_ic_strawberry", "name": "Strawberry", "price": 0 },
+                { "id": "opt_ic_strawberry_cheese", "name": "Strawberry Cheese Cake", "price": 0 },
+                { "id": "opt_ic_banana", "name": "Banana Pudding", "price": 0 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WILD OUT SHAKES",
+      "items": [
+        {
+          "id": "shake_wild_out",
+          "name": "Wild-Out Shakes (12 Flavors)",
+          "price": 6.99,
+          "description": "1 Free Topping"
+        },
+        {
+          "id": "shake_deep_fried_oreo",
+          "name": "Deep Fried Oreo 6 Pcs.",
+          "price": 5.99
+        }
+      ]
+    },
+    {
+      "name": "RICE PLATTERS",
+      "items": [
+        {
+          "id": "rice_chicken",
+          "name": "Chicken over Rice",
+          "price": 10.99
+        },
+        {
+          "id": "rice_lamb",
+          "name": "Lamb over Rice",
+          "price": 10.99
+        },
+        {
+          "id": "rice_mix",
+          "name": "Mix Chicken + Lamb",
+          "price": 10.99
+        },
+        {
+          "id": "rice_chopped_steak",
+          "name": "Chopped Steak over Rice",
+          "price": 10.99
+        },
+        {
+          "id": "rice_fish",
+          "name": "2 Pcs. Fish over Rice",
+          "price": 10.99
+        },
+        {
+          "id": "rice_shrimp",
+          "name": "6 Pcs. Jumbo Shrimp over Rice",
+          "price": 10.99
+        },
+        {
+          "id": "rice_falafel",
+          "name": "6 Pcs. Falafel over Rice",
+          "price": 10.99
+        },
+        {
+          "id": "rice_chicken_kofta",
+          "name": "Chicken Kofta Kabab over Rice",
+          "price": 10.99
+        }
+      ]
+    },
+    {
+      "name": "FRESH SEAFOOD",
+      "items": [
+        {
+          "id": "seafood_shrimp_6",
+          "name": "Jumbo Shrimp 6 Pcs.",
+          "price": 6.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "seafood_shrimp_10",
+          "name": "Jumbo Shrimp 10 Pcs.",
+          "price": 10.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "seafood_shrimp_21",
+          "name": "Jumbo Shrimp 21 Pcs.",
+          "price": 14.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "seafood_fish_2",
+          "name": "Fresh Fish 2 Pcs.",
+          "price": 5.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "seafood_fish_3",
+          "name": "Fresh Fish 3 Pcs.",
+          "price": 7.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "seafood_fish_5",
+          "name": "Fresh Fish 5 Pcs.",
+          "price": 12.99,
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "seafood_combo",
+          "name": "Seafood Combo",
+          "price": 14.99,
+          "description": "2 Pcs. Fish & 6 Pcs. Shrimp",
+          "modifiers": [
+            {
+              "id": "mod_make_combo_seafood",
+              "name": "Make it Combo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WILD OUT WINGS",
+      "items": [
+        {
+          "id": "wings_boneless_6",
+          "name": "Boneless Wings 6 Pcs.",
+          "price": 6.99,
+          "modifiers": [
+            {
+              "id": "mod_wings_dip",
+              "name": "Choice of Dip",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_dip_hot", "name": "Hot", "price": 0 },
+                { "id": "opt_dip_mild", "name": "Mild", "price": 0 },
+                { "id": "opt_dip_bbq", "name": "BBQ", "price": 0 },
+                { "id": "opt_dip_sweet_chili", "name": "Sweet Chili", "price": 0 },
+                { "id": "opt_dip_honey_mustard", "name": "Honey Mustard", "price": 0 },
+                { "id": "opt_dip_tangy", "name": "Tangy", "price": 0 },
+                { "id": "opt_dip_lemon_pepper", "name": "Lemon Pepper", "price": 0 },
+                { "id": "opt_dip_garlic_parm", "name": "Garlic Parmesan", "price": 0 },
+                { "id": "opt_dip_sweet_teriyaki", "name": "Sweet Teriyaki", "price": 0 },
+                { "id": "opt_dip_mango_habanero", "name": "Mango Habanero", "price": 0 },
+                { "id": "opt_dip_honey_garlic", "name": "Honey Garlic", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_wings",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "wings_boneless_12",
+          "name": "Boneless Wings 12 Pcs.",
+          "price": 12.99,
+          "modifiers": [
+            {
+              "id": "mod_wings_dip",
+              "name": "Choice of Dip",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_dip_hot", "name": "Hot", "price": 0 },
+                { "id": "opt_dip_mild", "name": "Mild", "price": 0 },
+                { "id": "opt_dip_bbq", "name": "BBQ", "price": 0 },
+                { "id": "opt_dip_sweet_chili", "name": "Sweet Chili", "price": 0 },
+                { "id": "opt_dip_honey_mustard", "name": "Honey Mustard", "price": 0 },
+                { "id": "opt_dip_tangy", "name": "Tangy", "price": 0 },
+                { "id": "opt_dip_lemon_pepper", "name": "Lemon Pepper", "price": 0 },
+                { "id": "opt_dip_garlic_parm", "name": "Garlic Parmesan", "price": 0 },
+                { "id": "opt_dip_sweet_teriyaki", "name": "Sweet Teriyaki", "price": 0 },
+                { "id": "opt_dip_mango_habanero", "name": "Mango Habanero", "price": 0 },
+                { "id": "opt_dip_honey_garlic", "name": "Honey Garlic", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_wings",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "wings_boneless_24",
+          "name": "Boneless Wings 24 Pcs.",
+          "price": 24.99,
+          "modifiers": [
+            {
+              "id": "mod_wings_dip",
+              "name": "Choice of Dip",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_dip_hot", "name": "Hot", "price": 0 },
+                { "id": "opt_dip_mild", "name": "Mild", "price": 0 },
+                { "id": "opt_dip_bbq", "name": "BBQ", "price": 0 },
+                { "id": "opt_dip_sweet_chili", "name": "Sweet Chili", "price": 0 },
+                { "id": "opt_dip_honey_mustard", "name": "Honey Mustard", "price": 0 },
+                { "id": "opt_dip_tangy", "name": "Tangy", "price": 0 },
+                { "id": "opt_dip_lemon_pepper", "name": "Lemon Pepper", "price": 0 },
+                { "id": "opt_dip_garlic_parm", "name": "Garlic Parmesan", "price": 0 },
+                { "id": "opt_dip_sweet_teriyaki", "name": "Sweet Teriyaki", "price": 0 },
+                { "id": "opt_dip_mango_habanero", "name": "Mango Habanero", "price": 0 },
+                { "id": "opt_dip_honey_garlic", "name": "Honey Garlic", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_wings",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "wings_traditional_5",
+          "name": "Traditional Wings 5 Pcs.",
+          "price": 7.49,
+          "modifiers": [
+            {
+              "id": "mod_wings_dip",
+              "name": "Choice of Dip",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_dip_hot", "name": "Hot", "price": 0 },
+                { "id": "opt_dip_mild", "name": "Mild", "price": 0 },
+                { "id": "opt_dip_bbq", "name": "BBQ", "price": 0 },
+                { "id": "opt_dip_sweet_chili", "name": "Sweet Chili", "price": 0 },
+                { "id": "opt_dip_honey_mustard", "name": "Honey Mustard", "price": 0 },
+                { "id": "opt_dip_tangy", "name": "Tangy", "price": 0 },
+                { "id": "opt_dip_lemon_pepper", "name": "Lemon Pepper", "price": 0 },
+                { "id": "opt_dip_garlic_parm", "name": "Garlic Parmesan", "price": 0 },
+                { "id": "opt_dip_sweet_teriyaki", "name": "Sweet Teriyaki", "price": 0 },
+                { "id": "opt_dip_mango_habanero", "name": "Mango Habanero", "price": 0 },
+                { "id": "opt_dip_honey_garlic", "name": "Honey Garlic", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_wings",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "wings_traditional_10",
+          "name": "Traditional Wings 10 Pcs.",
+          "price": 13.99,
+          "modifiers": [
+            {
+              "id": "mod_wings_dip",
+              "name": "Choice of Dip",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_dip_hot", "name": "Hot", "price": 0 },
+                { "id": "opt_dip_mild", "name": "Mild", "price": 0 },
+                { "id": "opt_dip_bbq", "name": "BBQ", "price": 0 },
+                { "id": "opt_dip_sweet_chili", "name": "Sweet Chili", "price": 0 },
+                { "id": "opt_dip_honey_mustard", "name": "Honey Mustard", "price": 0 },
+                { "id": "opt_dip_tangy", "name": "Tangy", "price": 0 },
+                { "id": "opt_dip_lemon_pepper", "name": "Lemon Pepper", "price": 0 },
+                { "id": "opt_dip_garlic_parm", "name": "Garlic Parmesan", "price": 0 },
+                { "id": "opt_dip_sweet_teriyaki", "name": "Sweet Teriyaki", "price": 0 },
+                { "id": "opt_dip_mango_habanero", "name": "Mango Habanero", "price": 0 },
+                { "id": "opt_dip_honey_garlic", "name": "Honey Garlic", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_wings",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "wings_traditional_20",
+          "name": "Traditional Wings 20 Pcs.",
+          "price": 25.99,
+          "modifiers": [
+            {
+              "id": "mod_wings_dip",
+              "name": "Choice of Dip",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_dip_hot", "name": "Hot", "price": 0 },
+                { "id": "opt_dip_mild", "name": "Mild", "price": 0 },
+                { "id": "opt_dip_bbq", "name": "BBQ", "price": 0 },
+                { "id": "opt_dip_sweet_chili", "name": "Sweet Chili", "price": 0 },
+                { "id": "opt_dip_honey_mustard", "name": "Honey Mustard", "price": 0 },
+                { "id": "opt_dip_tangy", "name": "Tangy", "price": 0 },
+                { "id": "opt_dip_lemon_pepper", "name": "Lemon Pepper", "price": 0 },
+                { "id": "opt_dip_garlic_parm", "name": "Garlic Parmesan", "price": 0 },
+                { "id": "opt_dip_sweet_teriyaki", "name": "Sweet Teriyaki", "price": 0 },
+                { "id": "opt_dip_mango_habanero", "name": "Mango Habanero", "price": 0 },
+                { "id": "opt_dip_honey_garlic", "name": "Honey Garlic", "price": 0 }
+              ]
+            },
+            {
+              "id": "mod_make_combo_wings",
+              "name": "Make it CoMbo",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_combo_yes", "name": "Yes", "price": 3.99 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CHICKEN NUGGETS",
+      "items": [
+        {
+          "id": "nuggets_10",
+          "name": "10 Pcs. Chicken Nuggets",
+          "price": 4.99
+        },
+        {
+          "id": "nuggets_10_combo",
+          "name": "10 Pcs. Nuggets Combo",
+          "price": 7.99,
+          "description": "w. Fries & Can Soda"
+        },
+        {
+          "id": "nuggets_20",
+          "name": "20 Pcs. Chicken Nuggets",
+          "price": 8.99
+        },
+        {
+          "id": "nuggets_20_combo",
+          "name": "20 Pcs. Nuggets Combo",
+          "price": 11.99,
+          "description": "w. Fries & Can Soda"
+        },
+        {
+          "id": "nuggets_30",
+          "name": "30 Pcs. Chicken Nuggets",
+          "price": 12.99
+        },
+        {
+          "id": "nuggets_30_combo",
+          "name": "30 Pcs. Nuggets Combo",
+          "price": 15.99,
+          "description": "w. Fries & Can Soda"
+        }
+      ]
+    },
+    {
+      "name": "FRESH SALADS",
+      "items": [
+        {
+          "id": "salad_garden",
+          "name": "Garden Salad",
+          "price": 6.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_grilled_chicken",
+          "name": "Grilled Chicken Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_lamb_gyro",
+          "name": "Lamb Gyro Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_fish",
+          "name": "Fish Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_falafel",
+          "name": "Falafel Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_mix",
+          "name": "Mix Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_chicken",
+          "name": "Chicken Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_steak",
+          "name": "Steak Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "salad_kofta",
+          "name": "Kofta Salad",
+          "price": 8.99,
+          "modifiers": [
+            {
+              "id": "mod_salad_toppings",
+              "name": "Include 5 Toppings of Your Choice",
+              "type": "multiple",
+              "minSelections": 0,
+              "maxSelections": 5,
+              "options": [
+                { "id": "opt_top_lettuce", "name": "Lettuce", "price": 0 },
+                { "id": "opt_top_mixed_chopped", "name": "Mixed Chopped Salad", "price": 0 },
+                { "id": "opt_top_tomato", "name": "Tomato", "price": 0 },
+                { "id": "opt_top_cucumber", "name": "Cucumber", "price": 0 },
+                { "id": "opt_top_corns", "name": "Corns", "price": 0 },
+                { "id": "opt_top_onions", "name": "Onions", "price": 0 },
+                { "id": "opt_top_banana_pepper", "name": "Banana Pepper", "price": 0 },
+                { "id": "opt_top_cherry_tomato", "name": "Cherry Tomato", "price": 0 },
+                { "id": "opt_top_olives", "name": "Olives", "price": 0 },
+                { "id": "opt_top_shredded_cheese", "name": "Shredded Cheese", "price": 0 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "COLD CUTS HERO",
+      "items": [
+        {
+          "id": "cold_cuts_turkey",
+          "name": "Turkey Hero",
+          "price": 9.99
+        },
+        {
+          "id": "cold_cuts_pastrami",
+          "name": "Pastrami Hero",
+          "price": 9.99
+        }
+      ]
+    },
+    {
+      "name": "SIDES ORDERS",
+      "items": [
+        {
+          "id": "side_fries",
+          "name": "Fries",
+          "price": 2.99
+        },
+        {
+          "id": "side_masala_fries",
+          "name": "Masala Fries",
+          "price": 3.99
+        },
+        {
+          "id": "side_cheese_fries",
+          "name": "Cheese Fries",
+          "price": 3.99
+        },
+        {
+          "id": "side_bacon_cheese_fries",
+          "name": "Bacon Cheese Fries",
+          "price": 6.99
+        },
+        {
+          "id": "side_onion_rings",
+          "name": "Onion Rings",
+          "price": 2.99
+        },
+        {
+          "id": "side_corn_nuggets",
+          "name": "Corn Nuggets",
+          "price": 4.99
+        },
+        {
+          "id": "side_mozzarella_sticks",
+          "name": "Mozzarella Sticks (6 Pcs.)",
+          "price": 5.99
+        },
+        {
+          "id": "side_jalapeno_poppers",
+          "name": "Jalapeño Poppers (6 Pcs.)",
+          "price": 4.99
+        },
+        {
+          "id": "side_falafel_balls",
+          "name": "Falafel Balls (3 Pcs.)",
+          "price": 2.99
+        },
+        {
+          "id": "side_vegetable_samosa",
+          "name": "Vegetable Samosa (3 Pcs.)",
+          "price": 5.49
+        }
+      ]
+    }
+  ]
+}
