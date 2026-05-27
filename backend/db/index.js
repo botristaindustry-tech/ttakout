@@ -1,8 +1,9 @@
 const { Pool } = require('pg');
 
+const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/ttakout';
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://localhost:5432/ttakout',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString,
+  ssl: connectionString.includes('render.com') ? { rejectUnauthorized: false } : false
 });
 
 module.exports = {
