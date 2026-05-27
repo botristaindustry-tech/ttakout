@@ -1,6 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const fs = require('fs');
+const path = require('path');
+const Fuse = require('fuse.js');
+
+// Load menu data for search
+const menuDataPath = path.join(__dirname, '../data/menu.json');
+let menuData = [];
+try {
+  menuData = JSON.parse(fs.readFileSync(menuDataPath, 'utf-8'));
+} catch (e) {
+  console.error("Could not load menu.json for lookup tool:", e);
+}
+
+// Setup Fuse.js for fuzzy searching the menu
+const fuse = new Fuse(menuData, {
+  keys: ['name', 'description'],
+  threshold: 0.4, // Lower threshold means more strict matching
+  includeScore: true
+});
 
 module.exports = (io) => {
 
@@ -34,11 +53,6 @@ module.exports = (io) => {
         const toolName = toolCall?.function?.name;
         const rawArgs = toolCall?.function?.arguments;
 
-        if (toolName !== 'submitOrder' && toolName !== 'submit_order') {
-          results.push({ toolCallId, result: { skipped: true, reason: 'Not submitOrder' } });
-          continue;
-        }
-
         let args;
         try {
           args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : (rawArgs || {});
@@ -47,94 +61,133 @@ module.exports = (io) => {
           continue;
         }
 
-        const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId;
-
-        // Respond immediately with the proper shape
-        results.push({ toolCallId, result: { ok: true, received: true, callId } });
-
-        // Do async processing AFTER responding so Vapi doesn't timeout
-        setImmediate(async () => {
-          try {
-            const { restaurant, customer, order, notes } = args;
-            if (!order || !callId) {
-               console.error('Invalid payload structure: missing order or callId', args);
-               return;
-            }
-
-            // Persist Order to DB
-            const insertOrderQuery = `
-              INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (
-                SELECT COALESCE(MAX(daily_order_code), 0) + 1 FROM orders WHERE created_at::date = CURRENT_DATE
-              ))
-              RETURNING *;
-            `;
-            const orderValues = [
-              callId,
-              restaurant || 'Unknown',
-              customer?.name || 'Unknown',
-              customer?.phone || 'Unknown',
-              order.subtotal || 0,
-              order.taxRate || 0,
-              order.tax || 0,
-              order.total || 0,
-              order.pickupEtaMinutes || 0,
-              notes || '',
-              'PENDING'
-            ];
-
-            const { rows } = await db.query(insertOrderQuery, orderValues);
-            const newOrder = rows[0];
-            newOrder.lines = [];
-
-            // Insert Order Lines and Modifiers
-            if (order.lines && Array.isArray(order.lines)) {
-              for (const line of order.lines) {
-                const insertLineQuery = `
-                  INSERT INTO order_lines (order_id, line_id, item_id, name, quantity, line_subtotal)
-                  VALUES ($1, $2, $3, $4, $5, $6)
-                  RETURNING *;
-                `;
-                const lineValues = [
-                  newOrder.id, 
-                  line.lineId || `line-${Date.now()}-${Math.random()}`, 
-                  line.itemId || 'unknown', 
-                  line.name, 
-                  line.quantity, 
-                  line.lineSubtotal || 0
-                ];
-                const lineRes = await db.query(insertLineQuery, lineValues);
-                const newLine = lineRes.rows[0];
-                newLine.modifiers = [];
-
-                if (line.modifiers && Array.isArray(line.modifiers)) {
-                  for (const mod of line.modifiers) {
-                    const insertModQuery = `
-                      INSERT INTO order_modifiers (order_line_id, name, option_name, price)
-                      VALUES ($1, $2, $3, $4)
-                      RETURNING *;
-                    `;
-                    const modRes = await db.query(insertModQuery, [
-                      newLine.id, 
-                      mod.name, 
-                      mod.option || mod.option_name, 
-                      mod.price || 0
-                    ]);
-                    newLine.modifiers.push(modRes.rows[0]);
-                  }
-                }
-                newOrder.lines.push(newLine);
-              }
-            }
-
-            // Emit Socket Event for Real-Time Sync
-            io.emit('new_order', newOrder);
-            console.log('Successfully processed Vapi order:', callId);
-            
-          } catch (err) {
-            console.error('Async order processing failed:', err);
+        // TOOL: lookup_menu_item
+        if (toolName === 'lookup_menu_item') {
+          const query = args.query;
+          if (!query) {
+            results.push({ toolCallId, result: { status: 'not-found', items: [] } });
+            continue;
           }
-        });
+
+          const searchResults = fuse.search(query);
+          
+          if (searchResults.length > 0) {
+            // Return top 3 matches
+            const items = searchResults.slice(0, 3).map(r => r.item);
+            results.push({
+              toolCallId,
+              result: {
+                status: 'found',
+                items: items
+              }
+            });
+          } else {
+            results.push({
+              toolCallId,
+              result: {
+                status: 'not-found',
+                items: []
+              }
+            });
+          }
+          continue;
+        }
+
+        // TOOL: submit_order
+        if (toolName === 'submitOrder' || toolName === 'submit_order') {
+          const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId;
+
+          // Respond immediately with the proper shape
+          results.push({ toolCallId, result: { ok: true, received: true, callId } });
+
+          // Do async processing AFTER responding so Vapi doesn't timeout
+          setImmediate(async () => {
+            try {
+              const { restaurant, customer, order, notes } = args;
+              if (!order || !callId) {
+                 console.error('Invalid payload structure: missing order or callId', args);
+                 return;
+              }
+
+              // Persist Order to DB
+              const insertOrderQuery = `
+                INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (
+                  SELECT COALESCE(MAX(daily_order_code), 0) + 1 FROM orders WHERE created_at::date = CURRENT_DATE
+                ))
+                RETURNING *;
+              `;
+              const orderValues = [
+                callId,
+                restaurant || 'Unknown',
+                customer?.name || 'Unknown',
+                customer?.phone || 'Unknown',
+                order.subtotal || 0,
+                order.taxRate || 0,
+                order.tax || 0,
+                order.total || 0,
+                order.pickupEtaMinutes || 0,
+                notes || '',
+                'PENDING'
+              ];
+
+              const { rows } = await db.query(insertOrderQuery, orderValues);
+              const newOrder = rows[0];
+              newOrder.lines = [];
+
+              // Insert Order Lines and Modifiers
+              if (order.lines && Array.isArray(order.lines)) {
+                for (const line of order.lines) {
+                  const insertLineQuery = `
+                    INSERT INTO order_lines (order_id, line_id, item_id, name, quantity, line_subtotal)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    RETURNING *;
+                  `;
+                  const lineValues = [
+                    newOrder.id, 
+                    line.lineId || `line-${Date.now()}-${Math.random()}`, 
+                    line.itemId || 'unknown', 
+                    line.name, 
+                    line.quantity, 
+                    line.lineSubtotal || 0
+                  ];
+                  const lineRes = await db.query(insertLineQuery, lineValues);
+                  const newLine = lineRes.rows[0];
+                  newLine.modifiers = [];
+
+                  if (line.modifiers && Array.isArray(line.modifiers)) {
+                    for (const mod of line.modifiers) {
+                      const insertModQuery = `
+                        INSERT INTO order_modifiers (order_line_id, name, option_name, price)
+                        VALUES ($1, $2, $3, $4)
+                        RETURNING *;
+                      `;
+                      const modRes = await db.query(insertModQuery, [
+                        newLine.id, 
+                        mod.name, 
+                        mod.option || mod.option_name, 
+                        mod.price || 0
+                      ]);
+                      newLine.modifiers.push(modRes.rows[0]);
+                    }
+                  }
+                  newOrder.lines.push(newLine);
+                }
+              }
+
+              // Emit Socket Event for Real-Time Sync
+              io.emit('new_order', newOrder);
+              console.log('Successfully processed Vapi order:', callId);
+              
+            } catch (err) {
+              console.error('Async order processing failed:', err);
+            }
+          });
+          continue;
+        }
+
+        // UNKNOWN TOOL
+        results.push({ toolCallId, result: { skipped: true, reason: 'Unknown tool' } });
       }
 
       return res.status(200).json({ results });

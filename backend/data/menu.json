@@ -1,0 +1,47 @@
+[
+  {
+    "itemId": "rice_chicken",
+    "name": "Chicken over Rice",
+    "price": 10.99,
+    "description": "Grilled marinated chicken served over basmati rice with a side salad and white sauce.",
+    "availability": "in-stock"
+  },
+  {
+    "itemId": "seafood_jumbo_shrimp_6",
+    "name": "Jumbo Shrimp (6 Pcs.)",
+    "price": 6.99,
+    "description": "Crispy fried jumbo shrimp.",
+    "availability": "in-stock"
+  },
+  {
+    "itemId": "wings_boneless_6",
+    "name": "Boneless Wings (6 Pcs.)",
+    "price": 6.99,
+    "description": "Six pieces of boneless chicken wings.",
+    "options": [
+      {
+        "name": "Wing Sauce",
+        "choices": [
+          {"name": "Honey Mustard", "price": 0},
+          {"name": "BBQ", "price": 0},
+          {"name": "Hot Buffalo", "price": 0}
+        ]
+      }
+    ],
+    "availability": "in-stock"
+  },
+  {
+    "itemId": "burger_special",
+    "name": "Terrace Special Burger",
+    "price": 15.99,
+    "description": "Double patty, house sauce, cheddar, lettuce, tomato.",
+    "availability": "in-stock"
+  },
+  {
+    "itemId": "gyro_lamb",
+    "name": "Lamb Gyro Pita",
+    "price": 8.99,
+    "description": "Classic lamb gyro meat wrapped in pita with tzatziki, lettuce, and tomatoes.",
+    "availability": "in-stock"
+  }
+]
