@@ -6,91 +6,142 @@ module.exports = (io) => {
 
   // VAPI Webhook Endpoint
   router.post('/vapi/orders', async (req, res) => {
-    // 1. Immediately return 202 Accepted to respect SLA Handshake Constraint
-    res.status(202).json({ status: 'Accepted' });
-
-    // 2. Security validation (mock secret token validation for now)
-    const providedSecret = req.headers['x-vapi-secret'] || req.headers['authorization'];
-    if (providedSecret !== process.env.VAPI_WEBHOOK_SECRET) {
-      console.error('Unauthorized webhook payload received.');
-      return; // Stop processing
-    }
-
     try {
-      const payload = req.body;
-      const {
-        restaurant,
-        customer,
-        order,
-        callId,
-        notes
-      } = payload;
-
-      // Ensure mandatory fields exist
-      if (!order || !callId) {
-         console.error('Invalid payload structure: missing order or callId');
-         return;
-      }
-
-      // 3 & 4. Persist Order to DB and calculate daily_order_code atomically
-      const insertOrderQuery = `
-        INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (
-          SELECT COALESCE(MAX(daily_order_code), 0) + 1 FROM orders WHERE created_at::date = CURRENT_DATE
-        ))
-        RETURNING *;
-      `;
-      const orderValues = [
-        callId,
-        restaurant || 'Unknown',
-        customer?.name || 'Unknown',
-        customer?.phone || 'Unknown',
-        order.subtotal || 0,
-        order.taxRate || 0,
-        order.tax || 0,
-        order.total || 0,
-        order.pickupEtaMinutes || 0,
-        notes || '',
-        'PENDING'
-      ];
-
-      const { rows } = await db.query(insertOrderQuery, orderValues);
-      const newOrder = rows[0];
-      newOrder.lines = [];
-
-      // 5. Insert Order Lines and Modifiers
-      if (order.lines && Array.isArray(order.lines)) {
-        for (const line of order.lines) {
-          const insertLineQuery = `
-            INSERT INTO order_lines (order_id, line_id, item_id, name, quantity, line_subtotal)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *;
-          `;
-          const lineValues = [newOrder.id, line.lineId, line.itemId, line.name, line.quantity, line.lineSubtotal];
-          const lineRes = await db.query(insertLineQuery, lineValues);
-          const newLine = lineRes.rows[0];
-          newLine.modifiers = [];
-
-          if (line.modifiers && Array.isArray(line.modifiers)) {
-            for (const mod of line.modifiers) {
-              const insertModQuery = `
-                INSERT INTO order_modifiers (order_line_id, name, option_name, price)
-                VALUES ($1, $2, $3, $4)
-                RETURNING *;
-              `;
-              const modRes = await db.query(insertModQuery, [newLine.id, mod.name, mod.option, mod.price]);
-              newLine.modifiers.push(modRes.rows[0]);
-            }
-          }
-          newOrder.lines.push(newLine);
+      // 1. Authentication
+      const auth = req.headers.authorization || req.headers['x-vapi-secret'] || '';
+      const secret = process.env.VAPI_WEBHOOK_SECRET;
+      
+      if (secret) {
+        const token = auth.replace('Bearer ', '').trim();
+        if (token !== secret) {
+          console.error('Unauthorized webhook payload received.');
+          return res.status(401).json({ error: 'Unauthorized' });
         }
       }
 
-      // 6. Emit Socket Event for Real-Time Sync
-      io.emit('new_order', newOrder);
+      const body = req.body;
+      const msg = body?.message;
+
+      if (msg?.type !== 'tool-calls' || !Array.isArray(msg.toolCallList)) {
+        console.warn('Received non-tool-call webhook:', body);
+        return res.status(202).json({ status: 'Accepted (ignored non-tool-call)' });
+      }
+
+      const results = [];
+
+      for (const toolCall of msg.toolCallList) {
+        const toolCallId = toolCall.id;
+        const toolName = toolCall?.function?.name;
+        const rawArgs = toolCall?.function?.arguments;
+
+        if (toolName !== 'submitOrder' && toolName !== 'submit_order') {
+          results.push({ toolCallId, result: { skipped: true, reason: 'Not submitOrder' } });
+          continue;
+        }
+
+        let args;
+        try {
+          args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : (rawArgs || {});
+        } catch (e) {
+          results.push({ toolCallId, result: { ok: false, error: 'Invalid JSON arguments' } });
+          continue;
+        }
+
+        const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId;
+
+        // Respond immediately with the proper shape
+        results.push({ toolCallId, result: { ok: true, received: true, callId } });
+
+        // Do async processing AFTER responding so Vapi doesn't timeout
+        setImmediate(async () => {
+          try {
+            const { restaurant, customer, order, notes } = args;
+            if (!order || !callId) {
+               console.error('Invalid payload structure: missing order or callId', args);
+               return;
+            }
+
+            // Persist Order to DB
+            const insertOrderQuery = `
+              INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (
+                SELECT COALESCE(MAX(daily_order_code), 0) + 1 FROM orders WHERE created_at::date = CURRENT_DATE
+              ))
+              RETURNING *;
+            `;
+            const orderValues = [
+              callId,
+              restaurant || 'Unknown',
+              customer?.name || 'Unknown',
+              customer?.phone || 'Unknown',
+              order.subtotal || 0,
+              order.taxRate || 0,
+              order.tax || 0,
+              order.total || 0,
+              order.pickupEtaMinutes || 0,
+              notes || '',
+              'PENDING'
+            ];
+
+            const { rows } = await db.query(insertOrderQuery, orderValues);
+            const newOrder = rows[0];
+            newOrder.lines = [];
+
+            // Insert Order Lines and Modifiers
+            if (order.lines && Array.isArray(order.lines)) {
+              for (const line of order.lines) {
+                const insertLineQuery = `
+                  INSERT INTO order_lines (order_id, line_id, item_id, name, quantity, line_subtotal)
+                  VALUES ($1, $2, $3, $4, $5, $6)
+                  RETURNING *;
+                `;
+                const lineValues = [
+                  newOrder.id, 
+                  line.lineId || `line-${Date.now()}-${Math.random()}`, 
+                  line.itemId || 'unknown', 
+                  line.name, 
+                  line.quantity, 
+                  line.lineSubtotal || 0
+                ];
+                const lineRes = await db.query(insertLineQuery, lineValues);
+                const newLine = lineRes.rows[0];
+                newLine.modifiers = [];
+
+                if (line.modifiers && Array.isArray(line.modifiers)) {
+                  for (const mod of line.modifiers) {
+                    const insertModQuery = `
+                      INSERT INTO order_modifiers (order_line_id, name, option_name, price)
+                      VALUES ($1, $2, $3, $4)
+                      RETURNING *;
+                    `;
+                    const modRes = await db.query(insertModQuery, [
+                      newLine.id, 
+                      mod.name, 
+                      mod.option || mod.option_name, 
+                      mod.price || 0
+                    ]);
+                    newLine.modifiers.push(modRes.rows[0]);
+                  }
+                }
+                newOrder.lines.push(newLine);
+              }
+            }
+
+            // Emit Socket Event for Real-Time Sync
+            io.emit('new_order', newOrder);
+            console.log('Successfully processed Vapi order:', callId);
+            
+          } catch (err) {
+            console.error('Async order processing failed:', err);
+          }
+        });
+      }
+
+      return res.status(200).json({ results });
       
     } catch (error) {
       console.error('Error processing VAPI webhook payload:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
   });
 
