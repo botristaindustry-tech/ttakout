@@ -75,6 +75,20 @@ export default function AdminDashboard() {
     return <div className="admin-dashboard-page">Loading Analytics...</div>;
   }
 
+  if (data.error) {
+    return (
+      <div className="admin-dashboard-page">
+        <div className="admin-dashboard-header">
+          <h1>Activity Dashboard</h1>
+        </div>
+        <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)' }}>
+          <h2 style={{ color: 'var(--error)' }}>Failed to load data</h2>
+          <p>{data.error}</p>
+        </div>
+      </div>
+    );
+  }
+
   // Format time series data for the chart
   const formatLabel = (label, isMultiDay) => {
     if (isMultiDay) {
