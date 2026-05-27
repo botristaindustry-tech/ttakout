@@ -1,0 +1,131 @@
+.admin-dashboard-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.admin-dashboard-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-header p {
+  color: var(--text-muted);
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-card-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Specific Stat Card Colors */
+.stat-card.revenue .stat-card-value {
+  color: var(--accent-primary);
+}
+
+.stat-card.rejected .stat-card-value {
+  color: #f43f5e;
+}
+
+.stat-card.orders .stat-card-value {
+  color: #10b981;
+}
+
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.chart-card {
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.chart-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+/* Tooltip Styling for Recharts */
+.custom-tooltip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.custom-tooltip-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.25rem;
+}
+
+.custom-tooltip-item {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.custom-tooltip-item span {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

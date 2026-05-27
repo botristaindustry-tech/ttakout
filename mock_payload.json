@@ -1,0 +1,48 @@
+{
+  "restaurant": "Halal N Out",
+  "customer": {
+    "name": "John Doe",
+    "phone": "+15165551234"
+  },
+  "order": {
+    "lines": [
+      {
+        "lineId": "line_x1",
+        "itemId": "rice_chicken",
+        "name": "Chicken over Rice",
+        "quantity": 1,
+        "modifiers": [],
+        "lineSubtotal": 10.99
+      },
+      {
+        "lineId": "line_x2",
+        "itemId": "rice_fish",
+        "name": "2 Pcs. Fish over Rice",
+        "quantity": 1,
+        "modifiers": [],
+        "lineSubtotal": 10.99
+      },
+      {
+        "lineId": "line_x3",
+        "itemId": "seafood_jumbo_shrimp_6",
+        "name": "Jumbo Shrimp (6 Pcs.)",
+        "quantity": 1,
+        "modifiers": [
+          {
+            "name": "Make it Combo",
+            "option": "Combo",
+            "price": 3.99
+          }
+        ],
+        "lineSubtotal": 10.98
+      }
+    ],
+    "subtotal": 32.96,
+    "taxRate": 0.08875,
+    "tax": 2.93,
+    "total": 35.89,
+    "pickupEtaMinutes": 20
+  },
+  "callId": "call_example_123",
+  "notes": "Pickup order"
+}

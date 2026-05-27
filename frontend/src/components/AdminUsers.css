@@ -1,0 +1,183 @@
+/* Admin Users & Roles Page Styles */
+.admin-users-page {
+  padding: 1rem;
+}
+
+/* Tabs */
+.users-tabs {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0;
+}
+
+.users-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.users-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.users-tab-btn.active {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.users-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-primary);
+  border-radius: 2px 2px 0 0;
+}
+
+/* Users Table Overrides */
+.users-table-container {
+  background: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.users-table-container h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.user-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.user-action-btn.delete:hover {
+  color: var(--status-critical);
+  background: rgba(244, 63, 94, 0.15);
+}
+
+/* Assign User Form */
+.assign-user-section {
+  background: transparent;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.assign-user-section h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.assign-user-form {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.assign-user-form .form-group {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+/* Roles Matrix */
+.matrix-container {
+  background: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.matrix-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.new-role-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.matrix-table th {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.matrix-table th:first-child {
+  text-align: left;
+}
+
+.matrix-category-row td {
+  padding: 1rem 0.5rem 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: none;
+}
+
+.matrix-perm-row td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.matrix-perm-row td:first-child {
+  text-align: left;
+}
+
+.perm-title {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.perm-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.matrix-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
