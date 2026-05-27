@@ -216,39 +216,47 @@ function App() {
                 </header>
                 
                 <main className="content-area">
-                  <Routes>
-                    <Route path="/" element={
-                      <ProtectedRoute user={user} requiredPermission="view_analytics" fallback="/kds">
-                        <IngestionDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/kds" element={
-                      <ProtectedRoute user={user} requiredPermission="view_kds" fallback="/">
-                        <KDS />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/settlement" element={
-                      <ProtectedRoute user={user} requiredPermission="view_settlement" fallback="/">
-                        <Settlement />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/admin/settings/kds" element={
-                      <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
-                        <AdminKdsSetup />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/admin/dashboard" element={
-                      <ProtectedRoute user={user} requiredPermission="view_dashboard" fallback="/kds">
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/admin/users" element={
-                      <ProtectedRoute user={user} requiredPermission="manage_users" fallback="/kds">
-                        <AdminUsers />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="*" element={<Navigate to={defaultRoute} replace />} />
-                  </Routes>
+                  {perms.length === 0 ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', marginTop: '10vh' }}>
+                      <h2>No Permissions Assigned</h2>
+                      <p>Your account is active, but you don't have any roles or permissions assigned yet.</p>
+                      <p>Please contact an Administrator to set up your account access.</p>
+                    </div>
+                  ) : (
+                    <Routes>
+                      <Route path="/" element={
+                        <ProtectedRoute user={user} requiredPermission="view_analytics" fallback="/kds">
+                          <IngestionDashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/kds" element={
+                        <ProtectedRoute user={user} requiredPermission="view_kds" fallback="/">
+                          <KDS />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/settlement" element={
+                        <ProtectedRoute user={user} requiredPermission="view_settlement" fallback="/">
+                          <Settlement />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/settings/kds" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
+                          <AdminKdsSetup />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/dashboard" element={
+                        <ProtectedRoute user={user} requiredPermission="view_dashboard" fallback="/kds">
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/users" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_users" fallback="/kds">
+                          <AdminUsers />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="*" element={<Navigate to={defaultRoute} replace />} />
+                    </Routes>
+                  )}
                 </main>
               </div>
             </div>
