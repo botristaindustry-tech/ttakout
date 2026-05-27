@@ -123,7 +123,7 @@ module.exports = (io) => {
 
         // TOOL: submit_order
         if (toolName === 'submitOrder' || toolName === 'submit_order') {
-          const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId;
+          const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId || `chat_test_${Date.now()}`;
 
           // Respond immediately with the proper shape
           results.push({ toolCallId, result: { ok: true, received: true, callId } });
