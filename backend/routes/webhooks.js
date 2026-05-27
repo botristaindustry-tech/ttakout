@@ -9,15 +9,31 @@ const Fuse = require('fuse.js');
 const menuDataPath = path.join(__dirname, '../data/menu.json');
 let menuData = [];
 try {
-  menuData = JSON.parse(fs.readFileSync(menuDataPath, 'utf-8'));
+  const rawData = JSON.parse(fs.readFileSync(menuDataPath, 'utf-8'));
+  // If the menu has categories, flatten them into a single array of items
+  if (rawData.categories && Array.isArray(rawData.categories)) {
+    rawData.categories.forEach(category => {
+      if (category.items && Array.isArray(category.items)) {
+        category.items.forEach(item => {
+          // Add the category name to the item so it can be searched too!
+          item.category = category.name;
+          menuData.push(item);
+        });
+      }
+    });
+  } else if (Array.isArray(rawData)) {
+    // Fallback if it's already a flat array
+    menuData = rawData;
+  }
 } catch (e) {
   console.error("Could not load menu.json for lookup tool:", e);
 }
 
 // Setup Fuse.js for fuzzy searching the menu
 const fuse = new Fuse(menuData, {
-  keys: ['name', 'description'],
+  keys: ['name', 'description', 'category'],
   threshold: 0.4, // Lower threshold means more strict matching
+  ignoreLocation: true, // Allows matching substring anywhere
   includeScore: true
 });
 
@@ -64,7 +80,10 @@ module.exports = (io) => {
         // TOOL: lookup_menu_item
         if (toolName === 'lookup_menu_item') {
           const query = args.query;
+          console.log(`[VAPI] Received menu lookup query: "${query}"`);
+
           if (!query) {
+            console.log(`[VAPI] Empty query, returning not-found.`);
             results.push({ toolCallId, result: { status: 'not-found', items: [] } });
             continue;
           }
@@ -74,6 +93,8 @@ module.exports = (io) => {
           if (searchResults.length > 0) {
             // Return top 3 matches
             const items = searchResults.slice(0, 3).map(r => r.item);
+            console.log(`[VAPI] Found ${items.length} matches for "${query}":`, items.map(i => i.name));
+            
             results.push({
               toolCallId,
               result: {
@@ -82,6 +103,7 @@ module.exports = (io) => {
               }
             });
           } else {
+            console.log(`[VAPI] No matches found for "${query}".`);
             results.push({
               toolCallId,
               result: {
