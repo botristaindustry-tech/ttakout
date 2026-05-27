@@ -91,8 +91,14 @@ module.exports = (io) => {
           const searchResults = fuse.search(query);
           
           if (searchResults.length > 0) {
-            // Return top 3 matches
-            const items = searchResults.slice(0, 3).map(r => r.item);
+            // Return top 3 matches and strip out huge modifier lists to save tokens
+            const items = searchResults.slice(0, 3).map(r => ({
+              id: r.item.id,
+              name: r.item.name,
+              price: r.item.price,
+              description: r.item.description || undefined
+            }));
+            
             console.log(`[VAPI] Found ${items.length} matches for "${query}":`, items.map(i => i.name));
             
             results.push({
@@ -212,6 +218,7 @@ module.exports = (io) => {
         results.push({ toolCallId, result: { skipped: true, reason: 'Unknown tool' } });
       }
 
+      console.log(`[VAPI] Sending webhook response:`, JSON.stringify({ results }, null, 2));
       return res.status(200).json({ results });
       
     } catch (error) {
