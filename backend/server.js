@@ -30,7 +30,11 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 
+// Trust proxy (Render runs behind a reverse proxy)
+app.set('trust proxy', 1);
+
 // Session Management
+const isProduction = process.env.NODE_ENV === 'production';
 app.use(session({
   store: new pgSession({
     pool: db.pool,
@@ -39,7 +43,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    httpOnly: true
+  }
 }));
 
 // Passport configuration
