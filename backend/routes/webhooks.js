@@ -137,7 +137,8 @@ module.exports = (io) => {
         }
 
         // TOOL: submit_order
-        if (toolName === 'submitOrder' || toolName === 'submit_order') {
+        const toolNameLower = toolName ? toolName.toLowerCase() : '';
+        if (toolName === 'submitOrder' || toolName === 'submit_order' || toolNameLower.includes('submit') || (toolNameLower.includes('order') && toolName !== 'lookup_menu_item')) {
           let { restaurant, customer, order, notes, pickupEtaMinutes, lines } = args;
           const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId || `chat_test_${Date.now()}`;
 
@@ -280,6 +281,7 @@ module.exports = (io) => {
         }
 
         // UNKNOWN TOOL
+        console.warn(`[VAPI] Unknown tool encountered: "${toolName}"`);
         results.push({ toolCallId, result: { skipped: true, reason: 'Unknown tool' } });
       }
 
