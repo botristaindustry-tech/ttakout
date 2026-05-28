@@ -55,6 +55,13 @@ module.exports = (io) => {
       }
 
       const body = req.body;
+      
+      // LOG INBOUND PAYLOAD
+      console.log('\n=============================================');
+      console.log(`[VAPI INBOUND] Received webhook request:`);
+      console.log(JSON.stringify(body, null, 2));
+      console.log('=============================================\n');
+
       const msg = body?.message;
 
       if (msg?.type !== 'tool-calls' || !Array.isArray(msg.toolCallList)) {
@@ -219,11 +226,38 @@ module.exports = (io) => {
       }
 
       console.log(`[VAPI] Sending webhook response:`, JSON.stringify({ results }, null, 2));
+
+      // Asynchronously store the entire interaction in the database for debugging
+      const interactionCallId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || null;
+      setImmediate(() => {
+        db.query(
+          `INSERT INTO webhook_logs (call_id, inbound_payload, outbound_payload) VALUES ($1, $2, $3)`,
+          [interactionCallId, JSON.stringify(body), JSON.stringify({ results })]
+        ).catch(err => console.error("Failed to save webhook log to DB:", err));
+      });
+
       return res.status(200).json({ results });
       
     } catch (error) {
       console.error('Error processing VAPI webhook payload:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  // Get Webhook Logs for Admin Dashboard
+  router.get('/vapi/logs', async (req, res) => {
+    try {
+      const query = `
+        SELECT id, call_id, inbound_payload, outbound_payload, created_at
+        FROM webhook_logs
+        ORDER BY created_at DESC
+        LIMIT 50;
+      `;
+      const { rows } = await db.query(query);
+      res.json(rows);
+    } catch (error) {
+      console.error('Failed to fetch webhook logs:', error);
+      res.status(500).json({ error: 'Failed to fetch logs' });
     }
   });
 

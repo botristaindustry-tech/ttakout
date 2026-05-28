@@ -7,6 +7,7 @@ import Settlement from './pages/Settlement';
 import AdminKdsSetup from './components/AdminKdsSetup';
 import AdminUsers from './components/AdminUsers';
 import AdminDashboard from './pages/AdminDashboard';
+import WebhookLogs from './pages/WebhookLogs';
 import Login from './pages/Login';
 
 function ProtectedRoute({ user, requiredPermission, children, fallback }) {
@@ -105,13 +106,22 @@ function SidebarDrawer({ isOpen, onClose, user }) {
               {settingsOpen && (
                 <div className="sidebar-sub-menu">
                   {perms.includes('manage_kds') && (
-                    <Link
-                    to="/admin/settings/kds"
-                    className={`sidebar-item sub ${isActive('/admin/settings/kds') ? 'active' : ''}`}
-                    onClick={handleNav}
-                  >
-                    KDS Setup
-                  </Link>
+                    <>
+                      <Link
+                        to="/admin/settings/kds"
+                        className={`sidebar-item sub ${isActive('/admin/settings/kds') ? 'active' : ''}`}
+                        onClick={handleNav}
+                      >
+                        KDS Setup
+                      </Link>
+                      <Link
+                        to="/admin/logs"
+                        className={`sidebar-item sub ${isActive('/admin/logs') ? 'active' : ''}`}
+                        onClick={handleNav}
+                      >
+                        Webhook Logs
+                      </Link>
+                    </>
                   )}
                 </div>
               )}
@@ -242,6 +252,11 @@ function App() {
                       <Route path="/admin/settings/kds" element={
                         <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
                           <AdminKdsSetup />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/logs" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
+                          <WebhookLogs />
                         </ProtectedRoute>
                       } />
                       <Route path="/admin/dashboard" element={
