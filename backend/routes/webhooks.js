@@ -138,7 +138,21 @@ module.exports = (io) => {
 
         // TOOL: submit_order
         if (toolName === 'submitOrder' || toolName === 'submit_order') {
+          const { restaurant, customer, order } = args;
           const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId || `chat_test_${Date.now()}`;
+
+          // Server-side validation to force AI to try again if it hallucinates an empty payload
+          if (!restaurant || !customer || !order || !order.lines || order.lines.length === 0) {
+            console.error('[VAPI] AI submitted an empty or invalid order payload:', args);
+            results.push({ 
+              toolCallId, 
+              result: { 
+                ok: false, 
+                error: "submit_order requires restaurant, customer, and order (with lines). Your payload was missing required fields. Please format the payload correctly and try again." 
+              } 
+            });
+            continue; // Skip DB insertion
+          }
 
           // Respond immediately with the proper shape
           results.push({ toolCallId, result: { ok: true, received: true, callId } });
