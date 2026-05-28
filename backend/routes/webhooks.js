@@ -76,6 +76,8 @@ module.exports = (io) => {
         const toolName = toolCall?.function?.name;
         const rawArgs = toolCall?.function?.arguments;
 
+        console.log(`[VAPI] Processing tool call: ${toolName} (ID: ${toolCallId})`);
+
         let args;
         try {
           args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : (rawArgs || {});

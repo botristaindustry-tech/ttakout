@@ -120,7 +120,12 @@ export default function IngestionDashboard() {
               >
                 <div className="order-card-header">
                   <span className={`sla-badge sla-badge-${sla.key}`}>{sla.label}</span>
-                  <span className="elapsed-timer">{formatElapsed(elapsedSeconds)}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                    <span className="elapsed-timer">{formatElapsed(elapsedSeconds)}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
                 </div>
                 <h3 className="order-code">#{order.daily_order_code || order.id.slice(0,8)}</h3>
                 <p className="order-customer">{order.customer_name}</p>

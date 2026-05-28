@@ -39,6 +39,7 @@ export const useOrderStore = create((set, get) => ({
 
     // Socket Event Listeners
     socket.on('new_order', (newOrder) => {
+      console.log(`[Order Intake] New order received at ${new Date().toLocaleTimeString()} - ID: ${newOrder.id}`);
       set((state) => ({
         orders: [...state.orders, newOrder]
       }));
