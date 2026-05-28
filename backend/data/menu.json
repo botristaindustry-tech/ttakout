@@ -417,13 +417,51 @@
       "items": [
         {
           "id": "bev_cans_water",
-          "name": "All Cans & Bottle Water",
-          "price": 1.49
+          "name": "Canned Soda & Bottled Water",
+          "price": 1.49,
+          "description": "Choice of Fanta Orange, Fanta Lime, Coca Cola, Diet Coke, Mountain Dew, Sprite, or Seltzer Water",
+          "modifiers": [
+            {
+              "id": "mod_can_drink_choice",
+              "name": "Drink Choice",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_can_fanta_orange", "name": "Fanta Orange", "price": 0 },
+                { "id": "opt_can_fanta_lime", "name": "Fanta Lime", "price": 0 },
+                { "id": "opt_can_coke", "name": "Coca Cola", "price": 0 },
+                { "id": "opt_can_diet_coke", "name": "Diet Coke", "price": 0 },
+                { "id": "opt_can_mountain_dew", "name": "Mountain Dew", "price": 0 },
+                { "id": "opt_can_sprite", "name": "Sprite", "price": 0 },
+                { "id": "opt_can_seltzer", "name": "Seltzer Water", "price": 0 },
+                { "id": "opt_can_water", "name": "Bottled Water", "price": 0 }
+              ]
+            }
+          ]
         },
         {
-          "id": "bev_bottles_gatorade_snapple",
-          "name": "All Bottles, Gatorade and Snapple",
-          "price": 2.49
+          "id": "bev_bottles",
+          "name": "Bottled Soda, Gatorade & Snapple",
+          "price": 2.49,
+          "description": "Choice of Mountain Dew, Sprite, Coca Cola, Seltzer, Gatorade, or Snapple",
+          "modifiers": [
+            {
+              "id": "mod_bottle_drink_choice",
+              "name": "Drink Choice",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_btl_mountain_dew", "name": "Mountain Dew", "price": 0 },
+                { "id": "opt_btl_sprite", "name": "Sprite", "price": 0 },
+                { "id": "opt_btl_coke", "name": "Coca Cola", "price": 0 },
+                { "id": "opt_btl_seltzer", "name": "Seltzer Water", "price": 0 },
+                { "id": "opt_btl_gatorade", "name": "Gatorade (Assorted Flavors)", "price": 0 },
+                { "id": "opt_btl_snapple", "name": "Snapple (Assorted Flavors)", "price": 0 }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -559,7 +597,30 @@
           "id": "shake_wild_out",
           "name": "Wild-Out Shakes (12 Flavors)",
           "price": 6.99,
-          "description": "1 Free Topping"
+          "description": "1 Free Topping. Includes 12 Assorted Flavors.",
+          "modifiers": [
+            {
+              "id": "mod_shake_flavor",
+              "name": "Flavor",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                { "id": "opt_shake_vanilla", "name": "Vanilla", "price": 0 },
+                { "id": "opt_shake_chocolate", "name": "Chocolate", "price": 0 },
+                { "id": "opt_shake_strawberry", "name": "Strawberry", "price": 0 },
+                { "id": "opt_shake_cookies_cream", "name": "Cookies N Cream", "price": 0 },
+                { "id": "opt_shake_peanut_butter", "name": "Peanut Butter", "price": 0 },
+                { "id": "opt_shake_banana", "name": "Banana", "price": 0 },
+                { "id": "opt_shake_caramel", "name": "Caramel", "price": 0 },
+                { "id": "opt_shake_mint_chocolate", "name": "Mint Chocolate Chip", "price": 0 },
+                { "id": "opt_shake_mango", "name": "Mango", "price": 0 },
+                { "id": "opt_shake_coffee", "name": "Coffee", "price": 0 },
+                { "id": "opt_shake_pineapple", "name": "Pineapple", "price": 0 },
+                { "id": "opt_shake_black_and_white", "name": "Black and White", "price": 0 }
+              ]
+            }
+          ]
         },
         {
           "id": "shake_deep_fried_oreo",
