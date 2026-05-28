@@ -32,7 +32,7 @@ try {
 // Setup Fuse.js for fuzzy searching the menu
 const fuse = new Fuse(menuData, {
   keys: ['name', 'description', 'category'],
-  threshold: 0.4, // Lower threshold means more strict matching
+  threshold: 0.6, // Loosened threshold (default is 0.6) for better matching of "piece" to "Pcs."
   ignoreLocation: true, // Allows matching substring anywhere
   includeScore: true
 });
@@ -95,7 +95,15 @@ module.exports = (io) => {
             continue;
           }
 
-          const searchResults = fuse.search(query);
+          // Clean up the query to remove words that confuse the fuzzy search
+          const cleanQuery = query
+            .toLowerCase()
+            .replace(/\b(piece|pieces|pcs\.?|order of|some|a|an|the)\b/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+            
+          console.log(`[VAPI] Original query: "${query}" | Cleaned query: "${cleanQuery}"`);
+          const searchResults = fuse.search(cleanQuery);
           
           if (searchResults.length > 0) {
             // Return top 3 matches and strip out huge modifier lists to save tokens
