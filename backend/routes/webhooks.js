@@ -138,20 +138,57 @@ module.exports = (io) => {
 
         // TOOL: submit_order
         if (toolName === 'submitOrder' || toolName === 'submit_order') {
-          const { restaurant, customer, order } = args;
+          let { restaurant, customer, order, notes, pickupEtaMinutes, lines } = args;
           const callId = body?.call?.id || msg?.call?.id || body?.message?.call?.id || args.callId || `chat_test_${Date.now()}`;
 
-          // Server-side validation to force AI to try again if it hallucinates an empty payload
+          // Support flat format by constructing the 'order' object dynamically
+          if (!order && lines && Array.isArray(lines)) {
+             let subtotal = 0;
+             const mappedLines = lines.map((line, index) => {
+               // Look up the actual price from our server-side menuData
+               const foundItem = menuData.find(m => m.id === line.itemId);
+               const price = foundItem ? foundItem.price : 0;
+               const name = foundItem ? foundItem.name : line.itemId;
+               const qty = line.quantity || 1;
+               const lineSubtotal = price * qty;
+               subtotal += lineSubtotal;
+               
+               return {
+                 lineId: `line_${index+1}`,
+                 itemId: line.itemId,
+                 name: name,
+                 quantity: qty,
+                 lineSubtotal: lineSubtotal,
+                 // Convert flat modifiersText string to the array structure the KDS expects
+                 modifiers: line.modifiersText ? [{ name: "Notes", option: line.modifiersText, price: 0 }] : []
+               };
+             });
+             
+             const taxRate = 0.08875;
+             const tax = subtotal * taxRate;
+             const total = subtotal + tax;
+             
+             order = {
+               subtotal,
+               taxRate,
+               tax,
+               total,
+               pickupEtaMinutes: pickupEtaMinutes || 20,
+               lines: mappedLines
+             };
+          }
+
+          // Server-side validation
           if (!restaurant || !customer || !order || !order.lines || order.lines.length === 0) {
             console.error('[VAPI] AI submitted an empty or invalid order payload:', args);
             results.push({ 
               toolCallId, 
               result: { 
                 ok: false, 
-                error: "submit_order requires restaurant, customer, and order (with lines). Your payload was missing required fields. Please format the payload correctly and try again." 
+                error: "submit_order requires restaurant, customer, and line items. Your payload was missing required fields. Please format correctly and try again." 
               } 
             });
-            continue; // Skip DB insertion
+            continue;
           }
 
           // Respond immediately with the proper shape
@@ -160,9 +197,8 @@ module.exports = (io) => {
           // Do async processing AFTER responding so Vapi doesn't timeout
           setImmediate(async () => {
             try {
-              const { restaurant, customer, order, notes } = args;
               if (!order || !callId) {
-                 console.error('Invalid payload structure: missing order or callId', args);
+                 console.error('Invalid payload structure: missing order or callId');
                  return;
               }
 
