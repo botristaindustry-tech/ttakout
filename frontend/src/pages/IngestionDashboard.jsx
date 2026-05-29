@@ -142,7 +142,7 @@ export default function IngestionDashboard() {
                 <div className="row-col-time">
                   <span className="elapsed-timer">{formatElapsed(elapsedSeconds)}</span>
                   <span className="timestamp-small">
-                    {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(order.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>
