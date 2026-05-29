@@ -41,6 +41,7 @@ export default function IngestionDashboard() {
   const [rejectReason, setRejectReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [activeTab, setActiveTab] = useState('incoming');
+  const [readOrders, setReadOrders] = useState(new Set());
 
   // Tick every second for live SLA timers
   useEffect(() => {
@@ -105,34 +106,44 @@ export default function IngestionDashboard() {
       )}
       
       {activeTab === 'incoming' && (
-        <div className="order-grid">
+        <div className="order-list">
           {pendingOrders.map(order => {
             const ingestTime = new Date(order.created_at).getTime();
             const elapsedSeconds = Math.floor((now - ingestTime) / 1000);
             const elapsedMins = Math.floor(elapsedSeconds / 60);
             const sla = getSlaStatus(elapsedMins);
+            const isRead = readOrders.has(order.id);
 
             return (
               <div 
                 key={order.id} 
-                className={`order-card sla-${sla.key}`}
-                onClick={() => setSelectedOrder(order)}
+                className={`order-list-row sla-${sla.key} ${isRead ? 'is-read' : ''}`}
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setReadOrders(prev => new Set(prev).add(order.id));
+                }}
               >
-                <div className="order-card-header">
+                <div className={`row-indicator sla-indicator-${sla.key}`}></div>
+                
+                <div className="row-col-status">
                   <span className={`sla-badge sla-badge-${sla.key}`}>{sla.label}</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-                    <span className="elapsed-timer">{formatElapsed(elapsedSeconds)}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
                 </div>
-                <h3 className="order-code">#{order.daily_order_code || order.id.slice(0,8)}</h3>
-                <p className="order-customer">{order.customer_name}</p>
-                <p className="order-restaurant">{order.restaurant_name}</p>
-                <div className="order-card-footer">
-                  <span>{order.lines?.length || 0} items</span>
+                
+                <div className="row-col-details">
+                  <h3 className="order-code">#{order.daily_order_code || order.id.slice(0,8)}</h3>
+                  <p className="order-customer">{order.customer_name} • {order.restaurant_name}</p>
+                </div>
+                
+                <div className="row-col-meta">
+                  <span className="meta-items">{order.lines?.length || 0} items</span>
                   <span className="order-total">${Number(order.total || 0).toFixed(2)}</span>
+                </div>
+                
+                <div className="row-col-time">
+                  <span className="elapsed-timer">{formatElapsed(elapsedSeconds)}</span>
+                  <span className="timestamp-small">
+                    {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
               </div>
             );
