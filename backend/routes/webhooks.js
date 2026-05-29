@@ -98,11 +98,18 @@ module.exports = (io) => {
           }
 
           // Clean up the query to remove words that confuse the fuzzy search
-          const cleanQuery = query
+          let cleanQuery = query
             .toLowerCase()
             .replace(/\b(piece|pieces|pcs\.?|order of|some|a|an|the)\b/g, '')
             .replace(/\s+/g, ' ')
             .trim();
+            
+          // Map common beverage terms to their exact menu categories to help fuzzy search
+          if (/(snapple|gatorade)/i.test(cleanQuery) || (/(bottle)/i.test(cleanQuery) && !/(water)/i.test(cleanQuery))) {
+            cleanQuery = "Bottled Soda Gatorade Snapple";
+          } else if (/(can|canned|water|coke|sprite|pepsi|fanta|ginger ale|seltzer)/i.test(cleanQuery)) {
+            cleanQuery = "Canned Soda Bottled Water";
+          }
             
           console.log(`[VAPI] Original query: "${query}" | Cleaned query: "${cleanQuery}"`);
           const searchResults = fuse.search(cleanQuery);
@@ -162,8 +169,10 @@ module.exports = (io) => {
                  name: name,
                  quantity: qty,
                  lineSubtotal: lineSubtotal,
-                 // Convert flat modifiersText string to the array structure the KDS expects
-                 modifiers: line.modifiersText ? [{ name: "Notes", option: line.modifiersText, price: 0 }] : []
+                 // Convert flat modifiersText/specialInstructions string to the array structure the KDS expects
+                 modifiers: [line.modifiersText, line.specialInstructions].filter(Boolean).length > 0 
+                   ? [{ name: "Notes", option: [line.modifiersText, line.specialInstructions].filter(Boolean).join(" | "), price: 0 }] 
+                   : []
                };
              });
              
