@@ -89,6 +89,9 @@ export default function KDS() {
         {queuedOrders.map(order => {
           const isFlipped = flippedCards[order.id];
           const ingestTime = new Date(order.updated_at || order.created_at).getTime();
+          const ingestDate = new Date(order.updated_at || order.created_at);
+          const formattedTimestamp = ingestDate.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + ingestDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
           const elapsedSeconds = Math.floor((now - ingestTime) / 1000);
           const elapsedMins = Math.floor(elapsedSeconds / 60);
           const slaKey = getSlaStatus(elapsedMins);
@@ -100,6 +103,7 @@ export default function KDS() {
                 {/* FRONT */}
                 <div className={`kds-card-front sla-bg-${slaKey}`} onClick={() => handleFlip(order.id)}>
                   <div className="kds-front-code">#{order.daily_order_code || order.id.slice(0,4)}</div>
+                  <div className="kds-front-timestamp" style={{ fontSize: '0.9rem', opacity: 0.7, marginTop: '-5px', marginBottom: '10px' }}>{formattedTimestamp}</div>
                   <div className="kds-front-timer">{formatDuration(elapsedSeconds)}</div>
                   <div className="kds-front-items">{order.lines?.length || 0} items</div>
                   <div className="kds-front-hint">tap to view</div>
@@ -108,7 +112,10 @@ export default function KDS() {
                 {/* BACK */}
                 <div className="kds-card-back">
                   <div className="kds-back-header">
-                    <h3>#{order.daily_order_code || order.id.slice(0,4)}</h3>
+                    <div>
+                      <h3 style={{ margin: 0 }}>#{order.daily_order_code || order.id.slice(0,4)}</h3>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '2px' }}>{formattedTimestamp}</div>
+                    </div>
                     <button className="kds-flip-btn" onClick={(e) => { e.stopPropagation(); handleFlip(order.id); }}>↩</button>
                   </div>
                   
