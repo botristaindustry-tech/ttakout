@@ -157,9 +157,41 @@ module.exports = (io) => {
              const mappedLines = lines.map((line, index) => {
                // Look up the actual price from our server-side menuData
                const foundItem = menuData.find(m => m.id === line.itemId);
-               const price = foundItem ? foundItem.price : 0;
+               let price = foundItem ? foundItem.price : 0;
                const name = foundItem ? foundItem.name : line.itemId;
                const qty = line.quantity || 1;
+               
+               let parsedModifiers = [];
+               const combinedNotes = [line.modifiersText, line.specialInstructions].filter(Boolean).join(" | ");
+
+               if (combinedNotes && foundItem && foundItem.modifiers) {
+                 foundItem.modifiers.forEach(mod => {
+                   const isComboMod = mod.name.toLowerCase().includes("combo");
+                   const notesLower = combinedNotes.toLowerCase();
+                   
+                   // Handle generic "Combo" mentions mapping to the "Yes" option
+                   if (isComboMod && notesLower.includes("combo")) {
+                     const comboOption = mod.options[0];
+                     if (comboOption) {
+                       price += comboOption.price;
+                       parsedModifiers.push({ name: mod.name, option: comboOption.name, price: comboOption.price });
+                     }
+                   } else {
+                     // Check if any specific priced option name was mentioned in the notes
+                     mod.options.forEach(opt => {
+                       if (opt.price > 0 && notesLower.includes(opt.name.toLowerCase()) && opt.name.toLowerCase() !== "yes" && opt.name.toLowerCase() !== "no") {
+                         price += opt.price;
+                         parsedModifiers.push({ name: mod.name, option: opt.name, price: opt.price });
+                       }
+                     });
+                   }
+                 });
+               }
+
+               if (combinedNotes) {
+                 parsedModifiers.push({ name: "Notes", option: combinedNotes, price: 0 });
+               }
+
                const lineSubtotal = price * qty;
                subtotal += lineSubtotal;
                
@@ -169,10 +201,7 @@ module.exports = (io) => {
                  name: name,
                  quantity: qty,
                  lineSubtotal: lineSubtotal,
-                 // Convert flat modifiersText/specialInstructions string to the array structure the KDS expects
-                 modifiers: [line.modifiersText, line.specialInstructions].filter(Boolean).length > 0 
-                   ? [{ name: "Notes", option: [line.modifiersText, line.specialInstructions].filter(Boolean).join(" | "), price: 0 }] 
-                   : []
+                 modifiers: parsedModifiers
                };
              });
              
