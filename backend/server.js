@@ -139,6 +139,12 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
+
+// Drop the restrictive role constraint on the users table to allow dynamic roles like 'Kitchen'
+db.query('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check')
+  .then(() => console.log('Successfully ensured dynamic roles are allowed (dropped users_role_check).'))
+  .catch(err => console.error('Error dropping users_role_check constraint:', err));
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
