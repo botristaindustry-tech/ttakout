@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useOrderStore } from '../store/orderStore';
 import './IngestionDashboard.css';
 
@@ -42,15 +42,73 @@ export default function IngestionDashboard() {
   const [customReason, setCustomReason] = useState('');
   const [activeTab, setActiveTab] = useState('incoming');
   const [readOrders, setReadOrders] = useState(new Set());
-
-  // Tick every second for live SLA timers
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(false);
+  const audioCtxRef = useRef(null);
+  const lastAlertTimeRef = useRef(0);
 
   const pendingOrders = orders.filter(o => o.status === 'PENDING');
   const archivedOrders = orders.filter(o => ['REJECTED', 'PAID'].includes(o.status));
+
+  const playAlert = useCallback((volume) => {
+    if (!isSoundEnabled) return;
+    
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    const ctx = audioCtxRef.current;
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1); // Slide to A6
+
+    gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  }, [isSoundEnabled]);
+
+  // Tick every second for live SLA timers and audio alerts
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const currentTime = Date.now();
+      setNow(currentTime);
+
+      if (!isSoundEnabled) return;
+
+      // Find the oldest unread order
+      const unreadOrders = pendingOrders.filter(o => !readOrders.has(o.id));
+      if (unreadOrders.length > 0) {
+        // Sort to find the oldest
+        const oldestOrder = unreadOrders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
+        const waitTimeSeconds = (currentTime - new Date(oldestOrder.created_at).getTime()) / 1000;
+
+        // Play alert every 5 seconds
+        if (currentTime - lastAlertTimeRef.current >= 5000) {
+          let volume = 0.2; // Default 20%
+          if (waitTimeSeconds > 60) {
+            volume = 1.0; // 100% after 60s
+          } else if (waitTimeSeconds > 30) {
+            volume = 0.5; // 50% after 30s
+          }
+          
+          playAlert(volume);
+          lastAlertTimeRef.current = currentTime;
+        }
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [pendingOrders, readOrders, isSoundEnabled, playAlert]);
 
   const handleProcess = (id) => {
     updateOrderStatus(id, 'KITCHEN_QUEUED');
@@ -76,22 +134,35 @@ export default function IngestionDashboard() {
           <p className="ingestion-subtitle">Front-of-house intake pipeline — {pendingOrders.length} pending</p>
         </div>
         
-        <div className="tab-switcher">
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 
-            className={`tab-btn ${activeTab === 'incoming' ? 'active' : ''}`}
-            onClick={() => setActiveTab('incoming')}
+            className={`tab-btn ${isSoundEnabled ? 'active' : ''}`}
+            onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+            style={{ 
+              borderColor: isSoundEnabled ? 'var(--status-normal)' : 'var(--border-subtle)',
+              color: isSoundEnabled ? 'white' : 'var(--text-muted)'
+            }}
           >
-            <span className="tab-dot incoming-dot"></span>
-            Incoming Queue
-            {pendingOrders.length > 0 && <span className="tab-count">{pendingOrders.length}</span>}
+            {isSoundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF'}
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'archive' ? 'active' : ''}`}
-            onClick={() => setActiveTab('archive')}
-          >
-            <span className="tab-dot archive-dot"></span>
-            Archive Log
-          </button>
+          
+          <div className="tab-switcher">
+            <button 
+              className={`tab-btn ${activeTab === 'incoming' ? 'active' : ''}`}
+              onClick={() => setActiveTab('incoming')}
+            >
+              <span className="tab-dot incoming-dot"></span>
+              Incoming Queue
+              {pendingOrders.length > 0 && <span className="tab-count">{pendingOrders.length}</span>}
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'archive' ? 'active' : ''}`}
+              onClick={() => setActiveTab('archive')}
+            >
+              <span className="tab-dot archive-dot"></span>
+              Archive Log
+            </button>
+          </div>
         </div>
       </div>
 
