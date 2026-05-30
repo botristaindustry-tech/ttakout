@@ -96,6 +96,18 @@ export default function IngestionDashboard() {
     return () => clearInterval(timer);
   }, [pendingOrders, readOrders, isSoundEnabled, playAlert]);
 
+  const handleToggleSound = () => {
+    const nextState = !isSoundEnabled;
+    setIsSoundEnabled(nextState);
+    
+    // Unlock iOS/Safari SpeechSynthesis by speaking immediately on user interaction
+    if (nextState && 'speechSynthesis' in window) {
+      const unlockUtterance = new SpeechSynthesisUtterance("");
+      unlockUtterance.volume = 0;
+      window.speechSynthesis.speak(unlockUtterance);
+    }
+  };
+
   const handleProcess = (id) => {
     updateOrderStatus(id, 'KITCHEN_QUEUED');
     setSelectedOrder(null);
@@ -123,7 +135,7 @@ export default function IngestionDashboard() {
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 
             className={`tab-btn ${isSoundEnabled ? 'active' : ''}`}
-            onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+            onClick={handleToggleSound}
             style={{ 
               borderColor: isSoundEnabled ? 'var(--status-normal)' : 'var(--border-subtle)',
               color: isSoundEnabled ? 'white' : 'var(--text-muted)'
