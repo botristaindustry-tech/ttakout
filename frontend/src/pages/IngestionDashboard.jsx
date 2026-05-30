@@ -49,13 +49,13 @@ export default function IngestionDashboard() {
   const pendingOrders = orders.filter(o => o.status === 'PENDING');
   const archivedOrders = orders.filter(o => ['REJECTED', 'PAID'].includes(o.status));
 
-  const playAlert = useCallback((volume) => {
+  const playAlert = useCallback((volume, message) => {
     if (!isSoundEnabled) return;
     
     if ('speechSynthesis' in window) {
       if (window.speechSynthesis.speaking) return; // Don't queue up overlapping announcements
       
-      const utterance = new SpeechSynthesisUtterance("You got a new order");
+      const utterance = new SpeechSynthesisUtterance(message);
       utterance.volume = volume;
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
@@ -70,27 +70,36 @@ export default function IngestionDashboard() {
       const currentTime = Date.now();
       setNow(currentTime);
 
-      if (!isSoundEnabled) return;
+      if (!isSoundEnabled || pendingOrders.length === 0) return;
 
-      // Find the oldest unread order
-      const unreadOrders = pendingOrders.filter(o => !readOrders.has(o.id));
-      if (unreadOrders.length > 0) {
-        // Sort to find the oldest
-        const oldestOrder = unreadOrders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
-        const waitTimeSeconds = (currentTime - new Date(oldestOrder.created_at).getTime()) / 1000;
-
-        // Play alert every 10 seconds so the speech isn't overlapping/annoying
-        if (currentTime - lastAlertTimeRef.current >= 10000) {
-          let volume = 0.2; // Default 20%
-          if (waitTimeSeconds > 60) {
-            volume = 1.0; // 100% after 60s
-          } else if (waitTimeSeconds > 30) {
-            volume = 0.5; // 50% after 30s
-          }
-          
-          playAlert(volume);
-          lastAlertTimeRef.current = currentTime;
+      // Play alert every 10 seconds so the speech isn't overlapping/annoying
+      if (currentTime - lastAlertTimeRef.current >= 10000) {
+        const unreadOrders = pendingOrders.filter(o => !readOrders.has(o.id));
+        
+        let targetOrder = null;
+        let message = "";
+        
+        if (unreadOrders.length > 0) {
+          // Unread orders take priority
+          targetOrder = unreadOrders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
+          message = "You got a new order";
+        } else {
+          // If all are read but still pending, alert for unprocessed
+          targetOrder = pendingOrders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
+          message = "You have unprocessed order";
         }
+
+        const waitTimeSeconds = (currentTime - new Date(targetOrder.created_at).getTime()) / 1000;
+        
+        let volume = 0.2; // Default 20%
+        if (waitTimeSeconds > 60) {
+          volume = 1.0; // 100% after 60s
+        } else if (waitTimeSeconds > 30) {
+          volume = 0.5; // 50% after 30s
+        }
+        
+        playAlert(volume, message);
+        lastAlertTimeRef.current = currentTime;
       }
     }, 1000);
     return () => clearInterval(timer);
