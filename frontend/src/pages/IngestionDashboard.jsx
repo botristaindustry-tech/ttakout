@@ -52,30 +52,16 @@ export default function IngestionDashboard() {
   const playAlert = useCallback((volume) => {
     if (!isSoundEnabled) return;
     
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    if ('speechSynthesis' in window) {
+      if (window.speechSynthesis.speaking) return; // Don't queue up overlapping announcements
+      
+      const utterance = new SpeechSynthesisUtterance("You got a new order");
+      utterance.volume = volume;
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      
+      window.speechSynthesis.speak(utterance);
     }
-    
-    const ctx = audioCtxRef.current;
-    if (ctx.state === 'suspended') {
-      ctx.resume();
-    }
-
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
-    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1); // Slide to A6
-
-    gainNode.gain.setValueAtTime(volume, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-
-    osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 0.5);
   }, [isSoundEnabled]);
 
   // Tick every second for live SLA timers and audio alerts
@@ -93,8 +79,8 @@ export default function IngestionDashboard() {
         const oldestOrder = unreadOrders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0];
         const waitTimeSeconds = (currentTime - new Date(oldestOrder.created_at).getTime()) / 1000;
 
-        // Play alert every 5 seconds
-        if (currentTime - lastAlertTimeRef.current >= 5000) {
+        // Play alert every 10 seconds so the speech isn't overlapping/annoying
+        if (currentTime - lastAlertTimeRef.current >= 10000) {
           let volume = 0.2; // Default 20%
           if (waitTimeSeconds > 60) {
             volume = 1.0; // 100% after 60s
