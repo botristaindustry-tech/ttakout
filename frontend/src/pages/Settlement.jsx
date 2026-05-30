@@ -128,7 +128,7 @@ export default function Settlement() {
                 <th style={{ textAlign: 'left' }}>Phone</th>
                 <th style={{ textAlign: 'left' }}>Amount</th>
                 <th style={{ textAlign: 'left' }}>Time Updated</th>
-                <th style={{ textAlign: 'right' }}>Status / Action</th>
+                <th style={{ textAlign: 'right' }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -151,22 +151,9 @@ export default function Settlement() {
                       {new Date(order.updated_at || order.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      {isPaid ? (
-                        <span className="status-pill pill-ready" style={{ display: 'inline-block', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}>
-                          ✓ {order.payment_type || 'Paid'}
-                        </span>
-                      ) : (
-                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
-                          {successMsg[order.id] ? (
-                            <span style={{ color: 'var(--status-normal)', fontSize: '0.85rem' }}>Settled</span>
-                          ) : (
-                            <>
-                              <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem', borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)' }} onClick={() => { handleTenderSelect(order.id, 'Credit Card'); handleConfirmPay(order.id); }}>💳 Credit</button>
-                              <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem', borderColor: 'var(--status-normal)', color: 'var(--status-normal)' }} onClick={() => { handleTenderSelect(order.id, 'Cash'); handleConfirmPay(order.id); }}>💵 Cash</button>
-                            </>
-                          )}
-                        </div>
-                      )}
+                      <span className="status-pill pill-ready" style={{ display: 'inline-block', background: isPaid ? 'rgba(16,185,129,0.15)' : 'rgba(99,102,241,0.15)', color: isPaid ? 'var(--status-normal)' : 'var(--accent-primary)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}>
+                        {isPaid ? `✓ ${order.payment_type || 'Paid'}` : 'READY'}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -320,7 +307,17 @@ export default function Settlement() {
                 </div>
               </div>
             </div>
-            <div className="modal-footer" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="modal-footer" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              {selectedOrder.status === 'READY_FOR_PICKUP' && (
+                successMsg[selectedOrder.id] ? (
+                  <span style={{ color: 'var(--status-normal)', fontWeight: 600, marginRight: 'auto' }}>✓ Settled!</span>
+                ) : (
+                  <>
+                    <button className="btn btn-outline" style={{ borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)' }} onClick={() => { handleTenderSelect(selectedOrder.id, 'Credit Card'); handleConfirmPay(selectedOrder.id); }}>💳 Credit Card</button>
+                    <button className="btn btn-outline" style={{ borderColor: 'var(--status-normal)', color: 'var(--status-normal)' }} onClick={() => { handleTenderSelect(selectedOrder.id, 'Cash'); handleConfirmPay(selectedOrder.id); }}>💵 Cash</button>
+                  </>
+                )
+              )}
               <button className="btn btn-outline" onClick={() => setSelectedOrder(null)}>Close</button>
             </div>
           </div>
