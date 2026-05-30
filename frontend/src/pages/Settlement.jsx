@@ -21,6 +21,8 @@ export default function Settlement() {
   const [selectedTender, setSelectedTender] = useState({});
   const [successMsg, setSuccessMsg] = useState({});
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('card');
   
   const readyOrders = orders.filter(o => o.status === 'READY_FOR_PICKUP');
   const paidOrders = orders.filter(o => o.status === 'PAID');
@@ -55,7 +57,15 @@ export default function Settlement() {
     }, 2000);
   };
 
-  const displayOrders = activeSubTab === 'ready' ? readyOrders : paidOrders;
+  const rawOrders = activeSubTab === 'ready' ? readyOrders : paidOrders;
+  const displayOrders = rawOrders.filter(order => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const code = (order.daily_order_code || order.id.slice(0,4)).toString().toLowerCase();
+    const name = (order.customer_name || '').toLowerCase();
+    const phone = (order.customer_phone || '').toLowerCase();
+    return code.includes(q) || name.includes(q) || phone.includes(q);
+  });
 
   return (
     <div className="settlement-page">
@@ -65,15 +75,34 @@ export default function Settlement() {
           <p className="settlement-subtitle">Process customer payments for completed orders</p>
         </div>
 
-        <div className="settlement-tabs">
-          <button className={`tab-btn ${activeSubTab === 'ready' ? 'active' : ''}`} onClick={() => setActiveSubTab('ready')}>
-            Ready for Pickup
-            {readyOrders.length > 0 && <span className="tab-count">{readyOrders.length}</span>}
-          </button>
-          <button className={`tab-btn ${activeSubTab === 'paid' ? 'active' : ''}`} onClick={() => setActiveSubTab('paid')}>
-            Paid Orders
-            {paidOrders.length > 0 && <span className="tab-count">{paidOrders.length}</span>}
-          </button>
+        <div className="settlement-controls" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <input 
+            type="text" 
+            placeholder="Search name or phone..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="settlement-search"
+          />
+          
+          <div className="view-toggle">
+            <button className={`toggle-btn ${viewMode === 'card' ? 'active' : ''}`} onClick={() => setViewMode('card')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+            <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <div className="settlement-tabs">
+            <button className={`tab-btn ${activeSubTab === 'ready' ? 'active' : ''}`} onClick={() => setActiveSubTab('ready')}>
+              Ready for Pickup
+              {readyOrders.length > 0 && <span className="tab-count">{readyOrders.length}</span>}
+            </button>
+            <button className={`tab-btn ${activeSubTab === 'paid' ? 'active' : ''}`} onClick={() => setActiveSubTab('paid')}>
+              Paid Orders
+              {paidOrders.length > 0 && <span className="tab-count">{paidOrders.length}</span>}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -89,7 +118,7 @@ export default function Settlement() {
         </div>
       )}
 
-      {activeSubTab === 'paid' ? (
+      {viewMode === 'list' ? (
         <div className="paid-orders-list glass-panel" style={{ padding: '1rem', overflowX: 'auto' }}>
           <table className="admin-table" style={{ width: '100%', minWidth: '700px' }}>
             <thead>
@@ -97,39 +126,55 @@ export default function Settlement() {
                 <th style={{ textAlign: 'left' }}>Order Code</th>
                 <th style={{ textAlign: 'left' }}>Name</th>
                 <th style={{ textAlign: 'left' }}>Phone</th>
-                <th style={{ textAlign: 'left' }}>Payment Type</th>
                 <th style={{ textAlign: 'left' }}>Amount</th>
-                <th style={{ textAlign: 'left' }}>Time Settled</th>
+                <th style={{ textAlign: 'left' }}>Time Updated</th>
+                <th style={{ textAlign: 'right' }}>Status / Action</th>
               </tr>
             </thead>
             <tbody>
-              {displayOrders.map(order => (
-                <tr 
-                  key={order.id} 
-                  className="paid-order-row"
-                  onDoubleClick={() => setSelectedOrder(order)}
-                  title="Double click to view details"
-                >
-                  <td style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
-                    #{order.daily_order_code || order.id.slice(0,4)}
-                  </td>
-                  <td>{order.customer_name}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{maskPhone(order.customer_phone)}</td>
-                  <td>
-                    <span className="status-pill pill-ready" style={{ display: 'inline-block', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}>
-                      {order.payment_type || 'Unknown'}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: 500 }}>${Number(order.total || 0).toFixed(2)}</td>
-                  <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    {new Date(order.updated_at || order.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </td>
-                </tr>
-              ))}
+              {displayOrders.map(order => {
+                const isPaid = order.status === 'PAID';
+                return (
+                  <tr 
+                    key={order.id} 
+                    className="paid-order-row"
+                    onDoubleClick={() => setSelectedOrder(order)}
+                    title="Double click to view details"
+                  >
+                    <td style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
+                      #{order.daily_order_code || order.id.slice(0,4)}
+                    </td>
+                    <td>{order.customer_name}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{maskPhone(order.customer_phone)}</td>
+                    <td style={{ fontWeight: 500 }}>${Number(order.total || 0).toFixed(2)}</td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      {new Date(order.updated_at || order.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      {isPaid ? (
+                        <span className="status-pill pill-ready" style={{ display: 'inline-block', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}>
+                          ✓ {order.payment_type || 'Paid'}
+                        </span>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+                          {successMsg[order.id] ? (
+                            <span style={{ color: 'var(--status-normal)', fontSize: '0.85rem' }}>Settled</span>
+                          ) : (
+                            <>
+                              <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem', borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)' }} onClick={() => { handleTenderSelect(order.id, 'Credit Card'); handleConfirmPay(order.id); }}>💳 Credit</button>
+                              <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem', borderColor: 'var(--status-normal)', color: 'var(--status-normal)' }} onClick={() => { handleTenderSelect(order.id, 'Cash'); handleConfirmPay(order.id); }}>💵 Cash</button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
               {displayOrders.length === 0 && (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                    No paid orders yet.
+                    No orders found.
                   </td>
                 </tr>
               )}
