@@ -85,14 +85,38 @@ module.exports = (io) => {
       `;
       const { rows: paymentSplit } = await db.query(paymentQuery, [start, end]);
 
-      // 3. Rejected Count
+      // 3. Rejected Count (includes normal rejected + flagged orders)
       const rejectedQuery = `
         SELECT COUNT(*) as count 
         FROM orders 
         WHERE created_at::date >= $1 AND created_at::date <= $2
-          AND status = 'REJECTED';
+          AND (status = 'REJECTED' OR status = 'FLAGGED');
       `;
       const { rows: rejected } = await db.query(rejectedQuery, [start, end]);
+
+      // 3.5. Rejected Time Breakdown (hourly for single day, daily for multi-day)
+      const rejectedTimeQuery = isMultiDay
+        ? `
+          SELECT 
+            created_at::date AS label,
+            COUNT(*) as count
+          FROM orders
+          WHERE created_at::date >= $1 AND created_at::date <= $2
+            AND (status = 'REJECTED' OR status = 'FLAGGED')
+          GROUP BY 1
+          ORDER BY 1;
+        `
+        : `
+          SELECT 
+            EXTRACT(hour FROM created_at) AS label,
+            COUNT(*) as count
+          FROM orders
+          WHERE created_at::date = $1
+            AND (status = 'REJECTED' OR status = 'FLAGGED')
+          GROUP BY 1
+          ORDER BY 1;
+        `;
+      const { rows: rejectedTimeSeries } = await db.query(rejectedTimeQuery, timeParams);
 
       // 4. Overall Totals
       const totalQuery = `
@@ -107,6 +131,7 @@ module.exports = (io) => {
         isMultiDay,
         paymentSplit,
         rejected: rejected[0].count,
+        rejectedTimeSeries,
         totals: totals[0]
       });
     } catch (error) {

@@ -47,6 +47,7 @@ export default function IngestionDashboard() {
   const lastAlertTimeRef = useRef(0);
 
   const pendingOrders = orders.filter(o => o.status === 'PENDING');
+  const flaggedOrders = orders.filter(o => o.status === 'FLAGGED');
   const archivedOrders = orders.filter(o => ['REJECTED', 'PAID'].includes(o.status));
 
   const playAlert = useCallback((volume, message) => {
@@ -163,6 +164,14 @@ export default function IngestionDashboard() {
               {pendingOrders.length > 0 && <span className="tab-count">{pendingOrders.length}</span>}
             </button>
             <button 
+              className={`tab-btn ${activeTab === 'flagged' ? 'active' : ''}`}
+              onClick={() => setActiveTab('flagged')}
+            >
+              <span className="tab-dot flagged-dot" style={{ background: '#f87171' }}></span>
+              Flagged Orders
+              {flaggedOrders.length > 0 && <span className="tab-count" style={{ background: 'var(--status-critical)' }}>{flaggedOrders.length}</span>}
+            </button>
+            <button 
               className={`tab-btn ${activeTab === 'archive' ? 'active' : ''}`}
               onClick={() => setActiveTab('archive')}
             >
@@ -235,6 +244,47 @@ export default function IngestionDashboard() {
               <p>No incoming orders. Pipeline is clear.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'flagged' && (
+        <div className="archive-table-wrapper glass-panel">
+          <table className="archive-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Total</th>
+                <th>Flagged At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flaggedOrders.map(order => (
+                <tr 
+                  key={order.id} 
+                  onClick={() => setSelectedOrder(order)} 
+                  style={{ cursor: 'pointer' }}
+                  title="Click to view details"
+                >
+                  <td style={{ color: '#f87171', fontWeight: 600 }}>#{order.daily_order_code || order.id.slice(0,8)}</td>
+                  <td>{order.customer_name}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{order.customer_phone}</td>
+                  <td style={{ fontWeight: 500 }}>${Number(order.total || 0).toFixed(2)}</td>
+                  <td>
+                    {new Date(order.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                </tr>
+              ))}
+              {flaggedOrders.length === 0 && (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    No flagged orders found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -327,7 +377,11 @@ export default function IngestionDashboard() {
               <div className="total-row total-final"><span>Total</span><span>${Number(selectedOrder.total || 0).toFixed(2)}</span></div>
             </div>
 
-            {rejectMode ? (
+            {selectedOrder.status === 'FLAGGED' ? (
+              <div className="modal-actions">
+                <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => setSelectedOrder(null)}>Close</button>
+              </div>
+            ) : rejectMode ? (
               <div className="reject-form">
                 <h4 className="section-title">Rejection Classification</h4>
                 <select 

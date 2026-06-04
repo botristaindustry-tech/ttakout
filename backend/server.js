@@ -161,6 +161,12 @@ db.query('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check')
   .then(() => console.log('Successfully ensured dynamic roles are allowed (dropped users_role_check).'))
   .catch(err => console.error('Error dropping users_role_check constraint:', err));
 
+// Drop and recreate restrictive orders status constraint to allow FLAGGED status
+db.query('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check')
+  .then(() => db.query("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('PENDING', 'KITCHEN_QUEUED', 'REJECTED', 'READY_FOR_PICKUP', 'PAID', 'FLAGGED'))"))
+  .then(() => console.log("Successfully ensured FLAGGED order status is allowed."))
+  .catch(err => console.error("Error updating orders_status_check constraint:", err));
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

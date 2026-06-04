@@ -111,6 +111,11 @@ export default function AdminDashboard() {
     revenue: parseFloat(d.revenue)
   }));
 
+  const rejectedChartData = (data.rejectedTimeSeries || []).map(d => ({
+    label: formatLabel(d.label, data.isMultiDay),
+    count: parseInt(d.count)
+  }));
+
   const pieData = data.paymentSplit.map(d => ({
     name: d.payment_type,
     value: parseInt(d.count),
@@ -126,7 +131,9 @@ export default function AdminDashboard() {
           <p className="custom-tooltip-label">{label}</p>
           {payload.map((entry, index) => (
             <p key={`item-${index}`} className="custom-tooltip-item" style={{ color: entry.color }}>
-              {entry.name === 'revenue' || entry.name === 'Revenue' ? 'Revenue:' : 'Orders:'} 
+              {entry.name === 'revenue' || entry.name === 'Revenue' 
+                ? 'Revenue:' 
+                : (entry.name.includes('Rejected') ? 'Rejected:' : 'Orders:')} 
               <span>
                 {entry.name === 'revenue' || entry.name === 'Revenue' 
                   ? `$${entry.value.toFixed(2)}` 
@@ -222,6 +229,28 @@ export default function AdminDashboard() {
             ) : (
               <div style={{color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%'}}>
                 No data available for this date range yet.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Hourly Rejected/Flagged Orders Chart */}
+        <div className="chart-card glass-panel">
+          <h3>Hourly Rejected Orders</h3>
+          <div className="chart-wrapper">
+            {rejectedChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={rejectedChartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="label" stroke="#94a3b8" tick={{fill: '#94a3b8'}} tickMargin={10} />
+                  <YAxis stroke="#94a3b8" tick={{fill: '#94a3b8'}} tickMargin={10} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} cursor={{fill: 'rgba(255,255,255,0.05)'}} />
+                  <Bar dataKey="count" name="Rejected Orders" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%'}}>
+                No rejected orders available for this date range yet.
               </div>
             )}
           </div>

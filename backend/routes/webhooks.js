@@ -288,6 +288,11 @@ module.exports = (io) => {
                  return;
               }
 
+              // Check if phone number is flagged
+              const flaggedCheckBefore = await db.query('SELECT 1 FROM flagged_phones WHERE phone_number = $1', [customer?.phone || 'Unknown']);
+              const isCallerFlagged = flaggedCheckBefore.rows.length > 0;
+              const initialStatus = isCallerFlagged ? 'FLAGGED' : 'PENDING';
+
               // Persist Order to DB
               const insertOrderQuery = `
                 INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
@@ -307,13 +312,12 @@ module.exports = (io) => {
                 order.total || 0,
                 order.pickupEtaMinutes || 0,
                 notes || '',
-                'PENDING'
+                initialStatus
               ];
 
               const { rows } = await db.query(insertOrderQuery, orderValues);
               const newOrder = rows[0];
-              const flaggedCheck = await db.query('SELECT 1 FROM flagged_phones WHERE phone_number = $1', [newOrder.customer_phone || '']);
-              newOrder.is_flagged = flaggedCheck.rows.length > 0;
+              newOrder.is_flagged = isCallerFlagged;
               newOrder.lines = [];
 
               // Insert Order Lines and Modifiers
