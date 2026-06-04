@@ -183,7 +183,14 @@ module.exports = (io) => {
                         if (optNameLower !== "yes" && optNameLower !== "no") {
                           let matches = notesLower.includes(optNameLower);
                           
-                          // Handle special aliases/variations for sauces and toppings
+                          // Prevent double-matching "Strawberry" when "Strawberry Cheese Cake" is intended
+                          if (matches && (opt.id === 'opt_ic_strawberry' || opt.id === 'opt_shake_strawberry')) {
+                            if (notesLower.includes('strawberry cheese') || notesLower.includes('strawberry cheesecake')) {
+                              matches = false;
+                            }
+                          }
+                          
+                          // Handle special aliases/variations for sauces, toppings, rice options, and ice cream flavors
                           if (!matches) {
                             if (opt.id === 'opt_sauce_white') {
                               matches = notesLower.includes('white sauce') || notesLower.includes('white');
@@ -200,6 +207,19 @@ module.exports = (io) => {
                               matches = notesLower.includes('olive');
                             } else if (opt.id === 'opt_top_corns') {
                               matches = notesLower.includes('corn');
+                            } else if (opt.id === 'opt_rice_seasoned') {
+                              matches = notesLower.includes('seasoned rice') || notesLower.includes('seasoned riced') || notesLower.includes('seasoned');
+                            } else if (opt.id === 'opt_rice_regular') {
+                              matches = notesLower.includes('regular rice') || notesLower.includes('regular');
+                            } else if (opt.id === 'opt_ic_cookies' || opt.id === 'opt_shake_cookies_cream') {
+                              matches = notesLower.includes('cookies n cream') || 
+                                        notesLower.includes('cookie n cream') || 
+                                        notesLower.includes('cookies and cream') || 
+                                        notesLower.includes('cookie and cream');
+                            } else if (opt.id === 'opt_ic_butter_pecan') {
+                              matches = notesLower.includes('butter pecan') || notesLower.includes('butter peacon');
+                            } else if (opt.id === 'opt_ic_strawberry_cheese') {
+                              matches = notesLower.includes('strawberry cheese cake') || notesLower.includes('strawberry cheesecake');
                             }
                           }
 

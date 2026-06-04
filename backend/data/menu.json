@@ -1766,6 +1766,25 @@
                   "price": 0
                 }
               ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
+                  "price": 0
+                }
+              ]
             }
           ]
         },
@@ -1794,6 +1813,25 @@
                 {
                   "id": "opt_sauce_bbq",
                   "name": "Barbie Q Sauce",
+                  "price": 0
+                }
+              ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
                   "price": 0
                 }
               ]
@@ -1828,6 +1866,25 @@
                   "price": 0
                 }
               ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
+                  "price": 0
+                }
+              ]
             }
           ]
         },
@@ -1856,6 +1913,25 @@
                 {
                   "id": "opt_sauce_bbq",
                   "name": "Barbie Q Sauce",
+                  "price": 0
+                }
+              ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
                   "price": 0
                 }
               ]
@@ -1890,6 +1966,25 @@
                   "price": 0
                 }
               ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
+                  "price": 0
+                }
+              ]
             }
           ]
         },
@@ -1918,6 +2013,25 @@
                 {
                   "id": "opt_sauce_bbq",
                   "name": "Barbie Q Sauce",
+                  "price": 0
+                }
+              ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
                   "price": 0
                 }
               ]
@@ -1952,6 +2066,25 @@
                   "price": 0
                 }
               ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
+                  "price": 0
+                }
+              ]
             }
           ]
         },
@@ -1980,6 +2113,25 @@
                 {
                   "id": "opt_sauce_bbq",
                   "name": "Barbie Q Sauce",
+                  "price": 0
+                }
+              ]
+            },
+            {
+              "id": "mod_rice_type",
+              "name": "Rice Option",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rice_seasoned",
+                  "name": "Seasoned Rice",
+                  "price": 0
+                },
+                {
+                  "id": "opt_rice_regular",
+                  "name": "Regular Rice",
                   "price": 0
                 }
               ]
