@@ -26,15 +26,18 @@ export const useOrderStore = create((set, get) => ({
     }
   },
 
-  // Connect and fetch initial data
   init: async () => {
     try {
       set({ isLoading: true });
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders`, { credentials: 'include' });
       const data = await res.json();
-      set({ orders: data, isLoading: false });
+      if (res.ok) {
+        set({ orders: Array.isArray(data) ? data : [], isLoading: false });
+      } else {
+        set({ error: data.error || 'Failed to load orders', orders: [], isLoading: false });
+      }
     } catch (error) {
-      set({ error: 'Failed to load orders', isLoading: false });
+      set({ error: 'Failed to load orders', orders: [], isLoading: false });
     }
 
     // Socket Event Listeners

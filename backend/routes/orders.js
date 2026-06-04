@@ -10,9 +10,16 @@ const requireManageKds = (req, res, next) => {
   next();
 };
 
+const requireAuth = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
 module.exports = (io) => {
   // Get all active orders (PENDING, KITCHEN_QUEUED, READY_FOR_PICKUP)
-  router.get('/', requireManageKds, async (req, res) => {
+  router.get('/', requireAuth, async (req, res) => {
     try {
       const ordersQuery = `
         SELECT o.*, 
@@ -46,7 +53,7 @@ module.exports = (io) => {
     }
   });
   // Get analytics for a date range
-  router.get('/analytics/today', requireManageKds, async (req, res) => {
+  router.get('/analytics/today', requireAuth, async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
       
