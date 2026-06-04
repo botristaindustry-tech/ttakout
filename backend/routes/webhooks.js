@@ -177,14 +177,39 @@ module.exports = (io) => {
                        parsedModifiers.push({ name: mod.name, option: comboOption.name, price: comboOption.price });
                      }
                    } else {
-                     // Check if any specific priced option name was mentioned in the notes
-                     mod.options.forEach(opt => {
-                       if (opt.price > 0 && notesLower.includes(opt.name.toLowerCase()) && opt.name.toLowerCase() !== "yes" && opt.name.toLowerCase() !== "no") {
-                         price += opt.price;
-                         parsedModifiers.push({ name: mod.name, option: opt.name, price: opt.price });
-                       }
-                     });
-                   }
+                      // Check if any specific option name was mentioned in the notes (can be 0 price or greater)
+                      mod.options.forEach(opt => {
+                        const optNameLower = opt.name.toLowerCase();
+                        if (optNameLower !== "yes" && optNameLower !== "no") {
+                          let matches = notesLower.includes(optNameLower);
+                          
+                          // Handle special aliases/variations for sauces and toppings
+                          if (!matches) {
+                            if (opt.id === 'opt_sauce_white') {
+                              matches = notesLower.includes('white sauce') || notesLower.includes('white');
+                            } else if (opt.id === 'opt_sauce_red') {
+                              matches = notesLower.includes('red sauce') || notesLower.includes('red saurce') || notesLower.includes('red');
+                            } else if (opt.id === 'opt_sauce_bbq') {
+                              matches = notesLower.includes('barbie q') || 
+                                        notesLower.includes('bbq') || 
+                                        notesLower.includes('barbecue') || 
+                                        notesLower.includes('barbeque');
+                            } else if (opt.id === 'opt_top_onions') {
+                              matches = notesLower.includes('onion');
+                            } else if (opt.id === 'opt_top_olives') {
+                              matches = notesLower.includes('olive');
+                            } else if (opt.id === 'opt_top_corns') {
+                              matches = notesLower.includes('corn');
+                            }
+                          }
+
+                          if (matches) {
+                            price += opt.price;
+                            parsedModifiers.push({ name: mod.name, option: opt.name, price: opt.price });
+                          }
+                        }
+                      });
+                    }
                  });
                }
 
