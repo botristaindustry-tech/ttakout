@@ -8,7 +8,11 @@ module.exports = (io) => {
     try {
       const ordersQuery = `
         SELECT o.*, 
-               EXISTS (SELECT 1 FROM flagged_phones fp WHERE fp.phone_number = o.customer_phone) AS is_flagged
+               EXISTS (
+                 SELECT 1 FROM flagged_phones fp 
+                 WHERE LENGTH(regexp_replace(o.customer_phone, '[^0-9]', '', 'g')) >= 7
+                   AND RIGHT(regexp_replace(fp.phone_number, '[^0-9]', '', 'g'), 10) = RIGHT(regexp_replace(o.customer_phone, '[^0-9]', '', 'g'), 10)
+               ) AS is_flagged
         FROM orders o 
         ORDER BY created_at ASC;
       `;
