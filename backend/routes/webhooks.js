@@ -288,8 +288,12 @@ module.exports = (io) => {
                  return;
               }
 
-              // Check if phone number is flagged
-              const flaggedCheckBefore = await db.query('SELECT 1 FROM flagged_phones WHERE phone_number = $1', [customer?.phone || 'Unknown']);
+              // Check if phone number is flagged using digits normalization (comparing last 10 digits)
+              const flaggedCheckBefore = await db.query(`
+                SELECT 1 FROM flagged_phones 
+                WHERE LENGTH(regexp_replace($1, '[^0-9]', '', 'g')) >= 7
+                  AND RIGHT(regexp_replace(phone_number, '[^0-9]', '', 'g'), 10) = RIGHT(regexp_replace($1, '[^0-9]', '', 'g'), 10)
+              `, [customer?.phone || 'Unknown']);
               const isCallerFlagged = flaggedCheckBefore.rows.length > 0;
               const initialStatus = isCallerFlagged ? 'FLAGGED' : 'PENDING';
 
