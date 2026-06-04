@@ -7,7 +7,9 @@ module.exports = (io) => {
   router.get('/', async (req, res) => {
     try {
       const ordersQuery = `
-        SELECT * FROM orders 
+        SELECT o.*, 
+               EXISTS (SELECT 1 FROM flagged_phones fp WHERE fp.phone_number = o.customer_phone) AS is_flagged
+        FROM orders o 
         ORDER BY created_at ASC;
       `;
       const { rows: orders } = await db.query(ordersQuery);

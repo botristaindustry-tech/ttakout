@@ -208,7 +208,10 @@ export default function IngestionDashboard() {
                 </div>
                 
                 <div className="row-col-details">
-                  <h3 className="order-code">#{order.daily_order_code || order.id.slice(0,8)}</h3>
+                  <h3 className="order-code" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    #{order.daily_order_code || order.id.slice(0,8)}
+                    {order.is_flagged && <span className="flagged-badge" style={{ fontSize: '0.7rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '0.1rem 0.4rem', borderRadius: '0.25rem', border: '1px solid rgba(239, 68, 68, 0.3)' }}>⚠️ FLAGGED</span>}
+                  </h3>
                   <p className="order-customer">{order.customer_name} • {order.restaurant_name}</p>
                 </div>
                 
@@ -285,7 +288,10 @@ export default function IngestionDashboard() {
               </div>
               <div className="detail-row">
                 <span className="detail-label">Phone</span>
-                <span className="detail-value">{formatPhone(selectedOrder.customer_phone)}</span>
+                <span className="detail-value" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {formatPhone(selectedOrder.customer_phone)}
+                  {selectedOrder.is_flagged && <span className="flagged-badge" style={{ fontSize: '0.75rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '0.15rem 0.4rem', borderRadius: '0.25rem', border: '1px solid rgba(239, 68, 68, 0.3)' }}>⚠️ FLAGGED PHONE</span>}
+                </span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Notes</span>

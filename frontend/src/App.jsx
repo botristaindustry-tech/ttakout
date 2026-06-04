@@ -9,6 +9,7 @@ import AdminUsers from './components/AdminUsers';
 import AdminDashboard from './pages/AdminDashboard';
 import WebhookLogs from './pages/WebhookLogs';
 import Login from './pages/Login';
+import FlaggedPhones from './pages/FlaggedPhones';
 
 function ProtectedRoute({ user, requiredPermission, children, fallback }) {
   const perms = user?.permissions || [];
@@ -120,6 +121,13 @@ function SidebarDrawer({ isOpen, onClose, user }) {
                         onClick={handleNav}
                       >
                         Webhook Logs
+                      </Link>
+                      <Link
+                        to="/admin/settings/flagged-phones"
+                        className={`sidebar-item sub ${isActive('/admin/settings/flagged-phones') ? 'active' : ''}`}
+                        onClick={handleNav}
+                      >
+                        Flagged Phones
                       </Link>
                     </>
                   )}
@@ -257,6 +265,11 @@ function App() {
                       <Route path="/admin/logs" element={
                         <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
                           <WebhookLogs />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/settings/flagged-phones" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
+                          <FlaggedPhones />
                         </ProtectedRoute>
                       } />
                       <Route path="/admin/dashboard" element={

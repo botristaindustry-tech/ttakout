@@ -312,6 +312,8 @@ module.exports = (io) => {
 
               const { rows } = await db.query(insertOrderQuery, orderValues);
               const newOrder = rows[0];
+              const flaggedCheck = await db.query('SELECT 1 FROM flagged_phones WHERE phone_number = $1', [newOrder.customer_phone || '']);
+              newOrder.is_flagged = flaggedCheck.rows.length > 0;
               newOrder.lines = [];
 
               // Insert Order Lines and Modifiers

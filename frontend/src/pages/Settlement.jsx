@@ -143,6 +143,7 @@ export default function Settlement() {
                   >
                     <td style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
                       #{order.daily_order_code || order.id.slice(0,4)}
+                      {order.is_flagged && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '0.05rem 0.3rem', borderRadius: '0.25rem', border: '1px solid rgba(239, 68, 68, 0.3)' }}>⚠️ FLAGGED</span>}
                     </td>
                     <td>{order.customer_name}</td>
                     <td style={{ color: 'var(--text-muted)' }}>{maskPhone(order.customer_phone)}</td>
@@ -184,7 +185,10 @@ export default function Settlement() {
                         {isPaid ? '✓ PAID' : 'READY'}
                       </span>
                     </div>
-                    <h2 className="settlement-order-code">#{order.daily_order_code || order.id.slice(0,4)}</h2>
+                     <h2 className="settlement-order-code" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                       #{order.daily_order_code || order.id.slice(0,4)}
+                       {order.is_flagged && <span style={{ fontSize: '0.7rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '0.05rem 0.3rem', borderRadius: '0.25rem', border: '1px solid rgba(239, 68, 68, 0.3)', fontWeight: 500 }}>⚠️ FLAGGED</span>}
+                     </h2>
                     <div className="settlement-customer">
                       <p className="customer-name">{order.customer_name}</p>
                       <p className="customer-phone">{maskPhone(order.customer_phone)}</p>
@@ -208,10 +212,13 @@ export default function Settlement() {
                         <span className="label">Customer</span>
                         <span className="value">{order.customer_name}</span>
                       </div>
-                      <div className="scustomer-row">
-                        <span className="label">Phone</span>
-                        <span className="value">{maskPhone(order.customer_phone)}</span>
-                      </div>
+                       <div className="scustomer-row">
+                         <span className="label">Phone</span>
+                         <span className="value" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                           {maskPhone(order.customer_phone)}
+                           {order.is_flagged && <span style={{ fontSize: '0.65rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '0.05rem 0.2rem', borderRadius: '0.15rem', border: '1px solid rgba(239, 68, 68, 0.3)' }}>⚠️ FLAGGED</span>}
+                         </span>
+                       </div>
                       <div className="scustomer-row">
                         <span className="label">Notes</span>
                         <span className="value">{order.notes || 'None'}</span>
@@ -278,7 +285,7 @@ export default function Settlement() {
             <div className="modal-body" style={{ marginTop: '1rem' }}>
               <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div><strong>Customer:</strong> {selectedOrder.customer_name}</div>
-                <div><strong>Phone:</strong> {maskPhone(selectedOrder.customer_phone)}</div>
+                 <div><strong>Phone:</strong> {maskPhone(selectedOrder.customer_phone)} {selectedOrder.is_flagged && <span style={{ fontSize: '0.7rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', padding: '0.1rem 0.3rem', borderRadius: '0.25rem', border: '1px solid rgba(239, 68, 68, 0.3)', marginLeft: '0.5rem' }}>⚠️ FLAGGED PHONE</span>}</div>
                 <div><strong>Status:</strong> <span className="status-pill pill-paid">{selectedOrder.status}</span></div>
                 <div><strong>Payment Type:</strong> {selectedOrder.payment_type}</div>
                 <div><strong>Time Settled:</strong> {new Date(selectedOrder.updated_at || selectedOrder.created_at).toLocaleString()}</div>

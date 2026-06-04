@@ -125,6 +125,7 @@ const ordersRoutes = require('./routes/orders')(io);
 const usersRoutes = require('./routes/users');
 const rolesRoutes = require('./routes/roles');
 const settingsRoutes = require('./routes/settings');
+const flaggedPhonesRoutes = require('./routes/flaggedPhones');
 
 app.use('/auth', authRoutes);
 app.use('/api/v1/webhooks', webhooksRoutes);
@@ -132,6 +133,7 @@ app.use('/api/v1/orders', ordersRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/roles', rolesRoutes);
 app.use('/api/v1/settings', settingsRoutes);
+app.use('/api/v1/flagged-phones', flaggedPhonesRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -139,6 +141,20 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
+
+// Ensure flagged_phones table exists
+const createFlaggedPhonesTableQuery = `
+  CREATE TABLE IF NOT EXISTS flagged_phones (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      phone_number VARCHAR(50) UNIQUE NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      notes TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  );
+`;
+db.query(createFlaggedPhonesTableQuery)
+  .then(() => console.log('Successfully ensured flagged_phones table exists.'))
+  .catch(err => console.error('Error creating flagged_phones table:', err));
 
 // Drop the restrictive role constraint on the users table to allow dynamic roles like 'Kitchen'
 db.query('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check')
