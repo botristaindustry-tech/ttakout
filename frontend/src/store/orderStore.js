@@ -73,13 +73,22 @@ export const useOrderStore = create((set, get) => ({
 
   updateOrderStatus: async (id, status, reject_reason = null, payment_type = null) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/${id}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ status, reject_reason, payment_type })
       });
-      // State updates via socket listener
+      if (res.ok) {
+        const updatedOrder = await res.json();
+        set((state) => ({
+          orders: state.orders.map(order => 
+            order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order
+          )
+        }));
+      } else {
+        console.error('Failed to update status', await res.text());
+      }
     } catch (error) {
       console.error('Failed to update status', error);
     }
@@ -87,12 +96,28 @@ export const useOrderStore = create((set, get) => ({
 
   updateLineStatus: async (lineId, is_completed) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/lines/${lineId}/complete`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/lines/${lineId}/complete`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ is_completed })
       });
+      if (res.ok) {
+        const updatedLine = await res.json();
+        set((state) => ({
+          orders: state.orders.map(order => {
+            if (order.id !== updatedLine.order_id) return order;
+            return {
+              ...order,
+              lines: order.lines.map(line => 
+                line.id === updatedLine.id ? { ...line, ...updatedLine } : line
+              )
+            };
+          })
+        }));
+      } else {
+        console.error('Failed to update line', await res.text());
+      }
     } catch (error) {
       console.error('Failed to update line', error);
     }

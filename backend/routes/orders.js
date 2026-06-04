@@ -160,7 +160,7 @@ module.exports = (io) => {
   });
 
   // Update order status (Process, Reject, Ready, Paid)
-  router.patch('/:id/status', requireManageKds, async (req, res) => {
+  router.patch('/:id/status', requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const { status, reject_reason, payment_type } = req.body;
@@ -200,7 +200,7 @@ module.exports = (io) => {
   });
 
   // Mark line item as completed (KDS checkbox)
-  router.patch('/lines/:lineId/complete', requireManageKds, async (req, res) => {
+  router.patch('/lines/:lineId/complete', requireAuth, async (req, res) => {
     try {
       const { lineId } = req.params;
       const { is_completed } = req.body;
