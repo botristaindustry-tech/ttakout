@@ -76,6 +76,7 @@ export const useOrderStore = create((set, get) => ({
       await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status, reject_reason, payment_type })
       });
       // State updates via socket listener
@@ -89,6 +90,7 @@ export const useOrderStore = create((set, get) => ({
       await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/lines/${lineId}/complete`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ is_completed })
       });
     } catch (error) {
