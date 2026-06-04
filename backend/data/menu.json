@@ -1677,6 +1677,40 @@
               ]
             },
             {
+              "id": "mod_shake_toppings",
+              "name": "Toppings",
+              "type": "single",
+              "minSelections": 0,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_top_fruity_pebbles",
+                  "name": "Fruity Pebbles",
+                  "price": 0
+                },
+                {
+                  "id": "opt_top_mini_oreo",
+                  "name": "Mini Oreo",
+                  "price": 0
+                },
+                {
+                  "id": "opt_top_corn_flakes",
+                  "name": "Corn Flakes",
+                  "price": 0
+                },
+                {
+                  "id": "opt_top_reeses",
+                  "name": "Reeses",
+                  "price": 0
+                },
+                {
+                  "id": "opt_top_ferrero_rocher",
+                  "name": "Ferrero Rocher",
+                  "price": 0
+                }
+              ]
+            },
+            {
               "id": "mod_sauces",
               "name": "Add Sauces",
               "type": "multiple",

@@ -170,7 +170,9 @@ module.exports = (io) => {
                    const notesLower = combinedNotes.toLowerCase();
                    
                    // Handle generic "Combo" mentions mapping to the "Yes" option
-                   if (isComboMod && notesLower.includes("combo")) {
+                   const isNoCombo = notesLower.includes("no combo") || notesLower.includes("without combo");
+                   const isYesCombo = notesLower.includes("combo") || notesLower.includes("yes");
+                   if (isComboMod && !isNoCombo && isYesCombo) {
                      const comboOption = mod.options[0];
                      if (comboOption) {
                        price += comboOption.price;
@@ -201,6 +203,8 @@ module.exports = (io) => {
                                         notesLower.includes('bbq') || 
                                         notesLower.includes('barbecue') || 
                                         notesLower.includes('barbeque');
+                            } else if (opt.id === 'opt_top_reeses') {
+                              matches = notesLower.includes('reeses') || notesLower.includes("reese's") || notesLower.includes('reese');
                             } else if (opt.id === 'opt_top_onions') {
                               matches = notesLower.includes('onion');
                             } else if (opt.id === 'opt_top_olives') {
