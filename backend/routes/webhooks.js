@@ -64,6 +64,43 @@ module.exports = (io) => {
 
       const msg = body?.message;
 
+      // Handle inbound call gating (assistant-request)
+      if (msg?.type === "assistant-request") {
+        const caller = msg?.call?.customer?.number;
+        const calledNumber = msg?.phoneNumber?.number;
+
+        if (!caller) {
+          return res.status(200).json({ error: "Unable to verify caller ID. Goodbye." });
+        }
+
+        try {
+          // Check if caller is in flagged list using our robust matching logic
+          const flaggedCheck = await db.query(`
+            SELECT 1 FROM flagged_phones 
+            WHERE LENGTH(regexp_replace($1, '[^0-9]', '', 'g')) >= 7
+              AND RIGHT(regexp_replace(phone_number, '[^0-9]', '', 'g'), 10) = RIGHT(regexp_replace($1, '[^0-9]', '', 'g'), 10)
+          `, [caller]);
+
+          if (flaggedCheck.rows.length > 0) {
+            console.log(`[VAPI] BLOCKED inbound call from flagged number: ${caller}`);
+            return res.status(200).json({
+              error: "We are unable to accept your call at this time. Goodbye."
+            });
+          }
+
+          console.log(`[VAPI] ALLOWED inbound call from: ${caller}`);
+          return res.status(200).json({
+            assistantId: "bb61c834-5bf3-4757-87be-9fcff7512a32"
+          });
+        } catch (error) {
+          console.error('[VAPI] Error querying flagged_phones during assistant-request:', error);
+          // If DB fails, fallback to allowing the call so business continues
+          return res.status(200).json({
+            assistantId: "bb61c834-5bf3-4757-87be-9fcff7512a32"
+          });
+        }
+      }
+
       if (msg?.type !== 'tool-calls' || !Array.isArray(msg.toolCallList)) {
         console.warn('Received non-tool-call webhook:', body);
         return res.status(202).json({ status: 'Accepted (ignored non-tool-call)' });
