@@ -12,7 +12,7 @@ const requireAdmin = (req, res, next) => {
 
 // GET /api/v1/settings
 // Fetch all settings as a single object
-router.get('/', async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
   try {
     const result = await pool.query('SELECT key, value FROM app_settings');
     const settings = {};

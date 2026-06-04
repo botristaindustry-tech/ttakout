@@ -5,6 +5,14 @@ const fs = require('fs');
 const path = require('path');
 const Fuse = require('fuse.js');
 
+// Middleware to verify admin permission
+const requireAdmin = (req, res, next) => {
+  if (!req.user || !req.user.permissions || !req.user.permissions.includes('admin')) {
+    return res.status(403).json({ error: 'Access denied: Admin only' });
+  }
+  next();
+};
+
 // Load menu data for search
 const menuDataPath = path.join(__dirname, '../data/menu.json');
 let menuData = [];
@@ -441,7 +449,7 @@ module.exports = (io) => {
   });
 
   // Get Webhook Logs for Admin Dashboard
-  router.get('/vapi/logs', async (req, res) => {
+  router.get('/vapi/logs', requireAdmin, async (req, res) => {
     try {
       const query = `
         SELECT id, call_id, inbound_payload, outbound_payload, created_at

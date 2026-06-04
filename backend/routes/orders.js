@@ -2,9 +2,17 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Middleware to verify manage_kds permission
+const requireManageKds = (req, res, next) => {
+  if (!req.user || !req.user.permissions || !req.user.permissions.includes('manage_kds')) {
+    return res.status(403).json({ error: 'Access denied: manage_kds permission required' });
+  }
+  next();
+};
+
 module.exports = (io) => {
   // Get all active orders (PENDING, KITCHEN_QUEUED, READY_FOR_PICKUP)
-  router.get('/', async (req, res) => {
+  router.get('/', requireManageKds, async (req, res) => {
     try {
       const ordersQuery = `
         SELECT o.*, 
@@ -38,7 +46,7 @@ module.exports = (io) => {
     }
   });
   // Get analytics for a date range
-  router.get('/analytics/today', async (req, res) => {
+  router.get('/analytics/today', requireManageKds, async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
       
@@ -145,7 +153,7 @@ module.exports = (io) => {
   });
 
   // Update order status (Process, Reject, Ready, Paid)
-  router.patch('/:id/status', async (req, res) => {
+  router.patch('/:id/status', requireManageKds, async (req, res) => {
     try {
       const { id } = req.params;
       const { status, reject_reason, payment_type } = req.body;
@@ -185,7 +193,7 @@ module.exports = (io) => {
   });
 
   // Mark line item as completed (KDS checkbox)
-  router.patch('/lines/:lineId/complete', async (req, res) => {
+  router.patch('/lines/:lineId/complete', requireManageKds, async (req, res) => {
     try {
       const { lineId } = req.params;
       const { is_completed } = req.body;

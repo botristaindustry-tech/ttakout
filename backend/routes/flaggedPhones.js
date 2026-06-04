@@ -12,7 +12,7 @@ const requireManageKds = (req, res, next) => {
 
 // GET /api/v1/flagged-phones
 // List all flagged phone numbers
-router.get('/', async (req, res) => {
+router.get('/', requireManageKds, async (req, res) => {
   try {
     const { rows } = await db.query('SELECT * FROM flagged_phones ORDER BY created_at DESC');
     res.json(rows);
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
 
 // POST /api/v1/flagged-phones
 // Add or update a flagged phone number
-router.post('/', async (req, res) => {
+router.post('/', requireManageKds, async (req, res) => {
   const { phone_number, name, notes } = req.body;
 
   if (!phone_number || !name) {
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
 
 // DELETE /api/v1/flagged-phones/:id
 // Remove a flagged phone number
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireManageKds, async (req, res) => {
   const { id } = req.params;
   try {
     const { rowCount } = await db.query('DELETE FROM flagged_phones WHERE id = $1', [id]);
