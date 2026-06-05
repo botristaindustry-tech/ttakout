@@ -55,7 +55,9 @@ export default function AdminDashboard() {
       queryParams = `?startDate=${customStart}&endDate=${customEnd}`;
     }
 
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/analytics/today${queryParams}`)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/orders/analytics/today${queryParams}`, {
+      credentials: 'include'
+    })
       .then(res => res.json())
       .then(json => {
         setData(json);
