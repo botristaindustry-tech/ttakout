@@ -13,7 +13,9 @@ export default function WebhookLogs() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/webhooks/vapi/logs`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/webhooks/vapi/logs`, {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         setLogs(data);
