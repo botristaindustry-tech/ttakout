@@ -20,7 +20,9 @@ export default function FlaggedPhones() {
   const fetchFlaggedPhones = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/flagged-phones`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/flagged-phones`, {
+        credentials: 'include'
+      });
       if (res.ok) {
         const data = await res.json();
         setFlaggedList(data);
@@ -46,6 +48,7 @@ export default function FlaggedPhones() {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/flagged-phones`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           phone_number: phone.trim(),
           name: name.trim(),
@@ -77,7 +80,8 @@ export default function FlaggedPhones() {
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/flagged-phones/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include'
       });
 
       if (res.ok) {
