@@ -13,37 +13,8 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-// Load menu data for search
-const menuDataPath = path.join(__dirname, '../data/menu.json');
-let menuData = [];
-try {
-  const rawData = JSON.parse(fs.readFileSync(menuDataPath, 'utf-8'));
-  // If the menu has categories, flatten them into a single array of items
-  if (rawData.categories && Array.isArray(rawData.categories)) {
-    rawData.categories.forEach(category => {
-      if (category.items && Array.isArray(category.items)) {
-        category.items.forEach(item => {
-          // Add the category name to the item so it can be searched too!
-          item.category = category.name;
-          menuData.push(item);
-        });
-      }
-    });
-  } else if (Array.isArray(rawData)) {
-    // Fallback if it's already a flat array
-    menuData = rawData;
-  }
-} catch (e) {
-  console.error("Could not load menu.json for lookup tool:", e);
-}
-
-// Setup Fuse.js for fuzzy searching the menu
-const fuse = new Fuse(menuData, {
-  keys: ['name', 'description', 'category'],
-  threshold: 0.6, // Loosened threshold (default is 0.6) for better matching of "piece" to "Pcs."
-  ignoreLocation: true, // Allows matching substring anywhere
-  includeScore: true
-});
+// We now use menuService to provide live menu data and searching
+const menuService = require('../services/menuService');
 
 module.exports = (io) => {
 
@@ -157,7 +128,7 @@ module.exports = (io) => {
           }
             
           console.log(`[VAPI] Original query: "${query}" | Cleaned query: "${cleanQuery}"`);
-          const searchResults = fuse.search(cleanQuery);
+          const searchResults = menuService.search(cleanQuery);
           
           if (searchResults.length > 0) {
             // Return top 3 matches and strip out huge modifier lists to save tokens
@@ -165,9 +136,10 @@ module.exports = (io) => {
               id: r.item.id,
               name: r.item.name,
               price: r.item.price,
-              description: r.item.description || undefined
+              description: r.item.description || "",
+              category: r.item.category,
+              isAvailable: r.item.is_available !== false
             }));
-            
             console.log(`[VAPI] Found ${items.length} matches for "${query}":`, items.map(i => i.name));
             
             results.push({
@@ -201,6 +173,7 @@ module.exports = (io) => {
              let subtotal = 0;
              const mappedLines = lines.map((line, index) => {
                // Look up the actual price from our server-side menuData
+               const menuData = menuService.getFlatMenu();
                const foundItem = menuData.find(m => m.id === line.itemId);
                let price = foundItem ? foundItem.price : 0;
                const name = foundItem ? foundItem.name : line.itemId;

@@ -126,6 +126,7 @@ const usersRoutes = require('./routes/users');
 const rolesRoutes = require('./routes/roles');
 const settingsRoutes = require('./routes/settings');
 const flaggedPhonesRoutes = require('./routes/flaggedPhones');
+const menuRoutes = require('./routes/menu');
 
 app.use('/auth', authRoutes);
 app.use('/api/v1/webhooks', webhooksRoutes);
@@ -134,6 +135,7 @@ app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/roles', rolesRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/flagged-phones', flaggedPhonesRoutes);
+app.use('/api/v1/menu', menuRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
