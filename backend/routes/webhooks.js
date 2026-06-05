@@ -170,6 +170,29 @@ module.exports = (io) => {
 
           // Support flat format by constructing the 'order' object dynamically
           if (!order && lines && Array.isArray(lines)) {
+             
+             // Pre-validation: Check for OUT OF STOCK items
+             let outOfStockItems = [];
+             const menuData = menuService.getFlatMenu();
+             for (const line of lines) {
+               const foundItem = menuData.find(m => m.id === line.itemId);
+               if (foundItem && foundItem.is_available === false) {
+                 outOfStockItems.push(foundItem.name || line.itemId);
+               }
+             }
+
+             if (outOfStockItems.length > 0) {
+               console.warn(`[VAPI] AI attempted to order out-of-stock items: ${outOfStockItems.join(', ')}`);
+               results.push({ 
+                 toolCallId, 
+                 result: { 
+                   ok: false, 
+                   error: `Order failed. The following items are currently OUT OF STOCK today and cannot be ordered: ${outOfStockItems.join(', ')}. Please apologize to the customer, inform them we are out of these items, and ask if they would like to order something else instead.` 
+                 } 
+               });
+               continue;
+             }
+
              let subtotal = 0;
              const mappedLines = lines.map((line, index) => {
                // Look up the actual price from our server-side menuData
