@@ -7,7 +7,7 @@ const Fuse = require('fuse.js');
 
 // Middleware to verify admin permission
 const requireAdmin = (req, res, next) => {
-  if (!req.user || !req.user.permissions || !req.user.permissions.includes('admin')) {
+  if (!req.user || !req.user.permissions || !req.user.permissions.includes('manage_kds')) {
     return res.status(403).json({ error: 'Access denied: Admin only' });
   }
   next();
