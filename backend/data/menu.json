@@ -901,7 +901,7 @@
       "items": [
         {
           "id": "tenders_2pcs",
-          "name": "2 Pcs. Chicken Tenders",
+          "name": "2 Pieces. Chicken Tenders",
           "price": 4.99,
           "modifiers": [
             {
@@ -946,7 +946,7 @@
         },
         {
           "id": "tenders_4pcs",
-          "name": "4 Pcs. Chicken Tenders",
+          "name": "4 Pieces. Chicken Tenders",
           "price": 8.99,
           "modifiers": [
             {
@@ -991,7 +991,7 @@
         },
         {
           "id": "tenders_6pcs",
-          "name": "6 Pcs. Chicken Tenders",
+          "name": "6 Pieces. Chicken Tenders",
           "price": 12.99,
           "modifiers": [
             {
@@ -1738,7 +1738,7 @@
         },
         {
           "id": "shake_deep_fried_oreo",
-          "name": "Deep Fried Oreo 6 Pcs.",
+          "name": "Deep Fried Oreo 6 Pieces.",
           "price": 5.99,
           "modifiers": [
             {
@@ -1974,7 +1974,7 @@
         },
         {
           "id": "rice_fish",
-          "name": "2 Pcs. Fish over Rice",
+          "name": "2 Pieces. Fish over Rice",
           "price": 10.99,
           "modifiers": [
             {
@@ -2024,7 +2024,7 @@
         },
         {
           "id": "rice_shrimp",
-          "name": "6 Pcs. Jumbo Shrimp over Rice",
+          "name": "6 Pieces. Jumbo Shrimp over Rice",
           "price": 10.99,
           "modifiers": [
             {
@@ -2074,7 +2074,7 @@
         },
         {
           "id": "rice_falafel",
-          "name": "6 Pcs. Falafel over Rice",
+          "name": "6 Pieces. Falafel over Rice",
           "price": 10.99,
           "modifiers": [
             {
@@ -2179,7 +2179,7 @@
       "items": [
         {
           "id": "seafood_shrimp_6",
-          "name": "Jumbo Shrimp 6 Pcs.",
+          "name": "Jumbo Shrimp 6 Pieces.",
           "price": 6.99,
           "modifiers": [
             {
@@ -2224,7 +2224,7 @@
         },
         {
           "id": "seafood_shrimp_10",
-          "name": "Jumbo Shrimp 10 Pcs.",
+          "name": "Jumbo Shrimp 10 Pieces.",
           "price": 10.99,
           "modifiers": [
             {
@@ -2268,8 +2268,8 @@
           ]
         },
         {
-          "id": "seafood_shrimp_21",
-          "name": "Jumbo Shrimp 21 Pcs.",
+          "id": "seafood_shrimp_15",
+          "name": "Jumbo Shrimp 15 Pieces.",
           "price": 14.99,
           "modifiers": [
             {
@@ -2314,7 +2314,7 @@
         },
         {
           "id": "seafood_fish_2",
-          "name": "Fresh Fish 2 Pcs.",
+          "name": "Fresh Fish 2 Pieces.",
           "price": 5.99,
           "modifiers": [
             {
@@ -2359,7 +2359,7 @@
         },
         {
           "id": "seafood_fish_3",
-          "name": "Fresh Fish 3 Pcs.",
+          "name": "Fresh Fish 3 Pieces.",
           "price": 7.99,
           "modifiers": [
             {
@@ -2404,7 +2404,7 @@
         },
         {
           "id": "seafood_fish_5",
-          "name": "Fresh Fish 5 Pcs.",
+          "name": "Fresh Fish 5 Pieces.",
           "price": 12.99,
           "modifiers": [
             {
@@ -2451,7 +2451,7 @@
           "id": "seafood_combo",
           "name": "Seafood Combo",
           "price": 14.99,
-          "description": "2 Pcs. Fish & 6 Pcs. Shrimp",
+          "description": "2 Pieces. Fish & 6 Pieces. Shrimp",
           "modifiers": [
             {
               "id": "mod_make_combo_seafood",
@@ -2500,7 +2500,7 @@
       "items": [
         {
           "id": "wings_boneless_6",
-          "name": "Boneless Wings 6 Pcs.",
+          "name": "Boneless Wings 6 Pieces.",
           "price": 6.99,
           "modifiers": [
             {
@@ -2609,7 +2609,7 @@
         },
         {
           "id": "wings_boneless_12",
-          "name": "Boneless Wings 12 Pcs.",
+          "name": "Boneless Wings 12 Pieces.",
           "price": 12.99,
           "modifiers": [
             {
@@ -2718,7 +2718,7 @@
         },
         {
           "id": "wings_boneless_24",
-          "name": "Boneless Wings 24 Pcs.",
+          "name": "Boneless Wings 24 Pieces.",
           "price": 24.99,
           "modifiers": [
             {
@@ -2827,7 +2827,7 @@
         },
         {
           "id": "wings_traditional_5",
-          "name": "Traditional Wings 5 Pcs.",
+          "name": "Traditional Wings 5 Pieces.",
           "price": 7.49,
           "modifiers": [
             {
@@ -2936,7 +2936,7 @@
         },
         {
           "id": "wings_traditional_10",
-          "name": "Traditional Wings 10 Pcs.",
+          "name": "Traditional Wings 10 Pieces.",
           "price": 13.99,
           "modifiers": [
             {
@@ -3045,7 +3045,7 @@
         },
         {
           "id": "wings_traditional_20",
-          "name": "Traditional Wings 20 Pcs.",
+          "name": "Traditional Wings 20 Pieces.",
           "price": 25.99,
           "modifiers": [
             {
@@ -3159,7 +3159,7 @@
       "items": [
         {
           "id": "nuggets_10",
-          "name": "10 Pcs. Chicken Nuggets",
+          "name": "10 Pieces. Chicken Nuggets",
           "price": 4.99,
           "modifiers": [
             {
@@ -3190,7 +3190,7 @@
         },
         {
           "id": "nuggets_10_combo",
-          "name": "10 Pcs. Nuggets Combo",
+          "name": "10 Pieces. Nuggets Combo",
           "price": 7.99,
           "description": "w. Fries & Can Soda",
           "modifiers": [
@@ -3222,7 +3222,7 @@
         },
         {
           "id": "nuggets_20",
-          "name": "20 Pcs. Chicken Nuggets",
+          "name": "20 Pieces. Chicken Nuggets",
           "price": 8.99,
           "modifiers": [
             {
@@ -3253,7 +3253,7 @@
         },
         {
           "id": "nuggets_20_combo",
-          "name": "20 Pcs. Nuggets Combo",
+          "name": "20 Pieces. Nuggets Combo",
           "price": 11.99,
           "description": "w. Fries & Can Soda",
           "modifiers": [
@@ -3285,7 +3285,7 @@
         },
         {
           "id": "nuggets_30",
-          "name": "30 Pcs. Chicken Nuggets",
+          "name": "30 Pieces. Chicken Nuggets",
           "price": 12.99,
           "modifiers": [
             {
@@ -3316,7 +3316,7 @@
         },
         {
           "id": "nuggets_30_combo",
-          "name": "30 Pcs. Nuggets Combo",
+          "name": "30 Pieces. Nuggets Combo",
           "price": 15.99,
           "description": "w. Fries & Can Soda",
           "modifiers": [
@@ -4421,7 +4421,7 @@
         },
         {
           "id": "side_mozzarella_sticks",
-          "name": "Mozzarella Sticks (6 Pcs.)",
+          "name": "Mozzarella Sticks (6 Pieces.)",
           "price": 5.99,
           "modifiers": [
             {
@@ -4452,7 +4452,7 @@
         },
         {
           "id": "side_jalapeno_poppers",
-          "name": "Jalapeño Poppers (6 Pcs.)",
+          "name": "Jalapeño Poppers (6 Pieces.)",
           "price": 4.99,
           "modifiers": [
             {
@@ -4483,7 +4483,7 @@
         },
         {
           "id": "side_falafel_balls",
-          "name": "Falafel Balls (3 Pcs.)",
+          "name": "Falafel Balls (3 Pieces.)",
           "price": 2.99,
           "modifiers": [
             {
@@ -4514,7 +4514,7 @@
         },
         {
           "id": "side_vegetable_samosa",
-          "name": "Vegetable Samosa (3 Pcs.)",
+          "name": "Vegetable Samosa (3 Pieces.)",
           "price": 5.49,
           "modifiers": [
             {
