@@ -95,18 +95,24 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
     }
 
     const currentData = await getResponse.json();
-    const updatedModel = { ...currentData.model };
 
-    if (updatedModel.messages && Array.isArray(updatedModel.messages)) {
-      const sysIndex = updatedModel.messages.findIndex(m => m.role === 'system');
+    // Safely update the system prompt
+    if (currentData.model?.messages && Array.isArray(currentData.model.messages)) {
+      const sysIndex = currentData.model.messages.findIndex(m => m.role === 'system');
       if (sysIndex !== -1) {
-        updatedModel.messages[sysIndex].content = systemPrompt;
+        currentData.model.messages[sysIndex].content = systemPrompt;
       } else {
-        updatedModel.messages.unshift({ role: 'system', content: systemPrompt });
+        currentData.model.messages.unshift({ role: 'system', content: systemPrompt });
       }
-    } else {
-      updatedModel.systemPrompt = systemPrompt;
+    } else if (currentData.model) {
+      currentData.model.systemPrompt = systemPrompt;
     }
+
+    // Remove read-only fields before sending back the full assistant object
+    delete currentData.id;
+    delete currentData.orgId;
+    delete currentData.createdAt;
+    delete currentData.updatedAt;
 
     const response = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
       method: 'PATCH',
@@ -114,9 +120,7 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
         'Authorization': `Bearer ${vapiApiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: updatedModel
-      })
+      body: JSON.stringify(currentData)
     });
 
     if (!response.ok) {
