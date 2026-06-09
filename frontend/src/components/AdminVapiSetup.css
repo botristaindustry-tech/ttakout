@@ -1,0 +1,222 @@
+.vapi-setup-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.vapi-setup-page h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--text-primary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vapi-setup-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
+}
+
+.vapi-setup-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.vapi-setup-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.vapi-setup-card {
+  background: var(--surface-light);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+}
+
+.vapi-setup-card h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.card-header-flex h2 {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.vapi-status-badge {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.vapi-status-badge.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.vapi-status-badge.error {
+  background: rgba(244, 63, 94, 0.15);
+  color: #f43f5e;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.prompt-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  margin-bottom: 1.5rem;
+}
+
+.vapi-prompt-textarea {
+  flex: 1;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #e2e8f0;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.vapi-prompt-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.vapi-save-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.vapi-sync-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, background-color 0.2s;
+}
+
+.vapi-sync-btn:active {
+  transform: scale(0.97);
+}
+
+.vapi-save-msg {
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.vapi-save-msg.success {
+  color: #10b981;
+}
+
+.vapi-save-msg.error {
+  color: #f43f5e;
+}
+
+.vapi-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+  margin-bottom: 1.5rem;
+}
+
+.vapi-alert strong {
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+}
+
+.vapi-alert p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.vapi-tips-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tip-item h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.05rem;
+  color: var(--accent-secondary);
+}
+
+.tip-item p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tip-item code {
+  background: rgba(255,255,255,0.1);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #e2e8f0;
+}
+
+.warning-tip h4 {
+  color: #f43f5e;
+}
+
+@media (max-width: 900px) {
+  .vapi-setup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

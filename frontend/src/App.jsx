@@ -11,6 +11,7 @@ import WebhookLogs from './pages/WebhookLogs';
 import Login from './pages/Login';
 import FlaggedPhones from './pages/FlaggedPhones';
 import MenuManager from './pages/MenuManager';
+import AdminVapiSetup from './components/AdminVapiSetup';
 
 function ProtectedRoute({ user, requiredPermission, children, fallback }) {
   const perms = user?.permissions || [];
@@ -136,6 +137,13 @@ function SidebarDrawer({ isOpen, onClose, user }) {
                         onClick={handleNav}
                       >
                         Menu Manager
+                      </Link>
+                      <Link
+                        to="/admin/settings/vapi"
+                        className={`sidebar-item sub ${isActive('/admin/settings/vapi') ? 'active' : ''}`}
+                        onClick={handleNav}
+                      >
+                        AI Agent Prompt
                       </Link>
                     </>
                   )}
@@ -283,6 +291,11 @@ function App() {
                       <Route path="/admin/settings/menu" element={
                         <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
                           <MenuManager />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/settings/vapi" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
+                          <AdminVapiSetup />
                         </ProtectedRoute>
                       } />
                       <Route path="/admin/dashboard" element={

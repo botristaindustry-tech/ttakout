@@ -52,6 +52,13 @@ module.exports = (io) => {
           return res.status(200).json({ error: "Unable to verify caller ID. Goodbye." });
         }
 
+        const assistantId = process.env.VAPI_ASSISTANT_ID;
+        
+        if (!assistantId) {
+          console.error("[VAPI] VAPI_ASSISTANT_ID is not configured in the environment.");
+          return res.status(500).json({ error: "Configuration missing" });
+        }
+
         try {
           // Check if caller is in flagged list using our robust matching logic
           const flaggedCheck = await db.query(`
@@ -68,15 +75,11 @@ module.exports = (io) => {
           }
 
           console.log(`[VAPI] ALLOWED inbound call from: ${caller}`);
-          return res.status(200).json({
-            assistantId: "bb61c834-5bf3-4757-87be-9fcff7512a32"
-          });
+          return res.status(200).json({ assistantId });
         } catch (error) {
           console.error('[VAPI] Error querying flagged_phones during assistant-request:', error);
           // If DB fails, fallback to allowing the call so business continues
-          return res.status(200).json({
-            assistantId: "bb61c834-5bf3-4757-87be-9fcff7512a32"
-          });
+          return res.status(200).json({ assistantId });
         }
       }
 
