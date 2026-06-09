@@ -51,7 +51,14 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
     }
 
     const data = await response.json();
-    const systemPrompt = data.model?.systemPrompt || '';
+    let systemPrompt = '';
+    
+    if (data.model?.systemPrompt) {
+      systemPrompt = data.model.systemPrompt;
+    } else if (data.model?.messages && Array.isArray(data.model.messages)) {
+      const sysMsg = data.model.messages.find(m => m.role === 'system');
+      if (sysMsg) systemPrompt = sysMsg.content;
+    }
     
     res.json({
       configured: true,
@@ -77,6 +84,30 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'VAPI API Key and Assistant ID must be configured in environment variables' });
     }
 
+    // First, fetch the current assistant to ensure we don't overwrite the whole model config
+    const getResponse = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${vapiApiKey}` }
+    });
+
+    if (!getResponse.ok) {
+      return res.status(getResponse.status).json({ error: 'Failed to fetch current VAPI configuration.' });
+    }
+
+    const currentData = await getResponse.json();
+    const updatedModel = { ...currentData.model };
+
+    if (updatedModel.messages && Array.isArray(updatedModel.messages)) {
+      const sysIndex = updatedModel.messages.findIndex(m => m.role === 'system');
+      if (sysIndex !== -1) {
+        updatedModel.messages[sysIndex].content = systemPrompt;
+      } else {
+        updatedModel.messages.unshift({ role: 'system', content: systemPrompt });
+      }
+    } else {
+      updatedModel.systemPrompt = systemPrompt;
+    }
+
     const response = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
       method: 'PATCH',
       headers: {
@@ -84,9 +115,7 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: {
-          systemPrompt: systemPrompt
-        }
+        model: updatedModel
       })
     });
 
