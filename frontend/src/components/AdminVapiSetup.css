@@ -92,11 +92,24 @@
   border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
+.vapi-field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
 .prompt-editor-container {
   display: flex;
   flex-direction: column;
   height: 500px;
   margin-bottom: 1.5rem;
+}
+
+.vapi-first-msg-textarea {
+  height: 80px;
+  min-height: 80px;
 }
 
 .vapi-prompt-textarea {

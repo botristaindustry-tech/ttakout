@@ -63,6 +63,7 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
     res.json({
       configured: true,
       name: data.name,
+      firstMessage: data.firstMessage || '',
       systemPrompt: systemPrompt
     });
   } catch (err) {
@@ -75,7 +76,7 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
 // Update Vapi system prompt
 router.post('/vapi/prompt', requireAdmin, async (req, res) => {
   try {
-    const { systemPrompt } = req.body;
+    const { systemPrompt, firstMessage } = req.body;
     
     const vapiApiKey = process.env.VAPI_API_KEY;
     const vapiAssistantId = process.env.VAPI_ASSISTANT_ID;
@@ -106,6 +107,10 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
       }
     } else if (currentData.model) {
       currentData.model.systemPrompt = systemPrompt;
+    }
+
+    if (firstMessage !== undefined) {
+      currentData.firstMessage = firstMessage;
     }
 
     // Remove read-only fields before sending back the full assistant object

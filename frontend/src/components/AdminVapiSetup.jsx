@@ -6,6 +6,7 @@ export default function AdminVapiSetup() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState({ text: '', type: '' });
   const [configured, setConfigured] = useState(false);
+  const [firstMessage, setFirstMessage] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
   const [assistantName, setAssistantName] = useState('');
 
@@ -15,6 +16,7 @@ export default function AdminVapiSetup() {
       .then(data => {
         if (data.configured) {
           setConfigured(true);
+          setFirstMessage(data.firstMessage || '');
           setSystemPrompt(data.systemPrompt || '');
           setAssistantName(data.name || 'AI Assistant');
         } else {
@@ -37,7 +39,7 @@ export default function AdminVapiSetup() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ systemPrompt })
+        body: JSON.stringify({ systemPrompt, firstMessage })
       });
       const data = await res.json();
       
@@ -85,7 +87,19 @@ export default function AdminVapiSetup() {
             </div>
           ) : (
             <>
-              <div className="vapi-field prompt-editor-container">
+              <div className="vapi-field">
+                <label className="vapi-field-label">First Message</label>
+                <textarea
+                  value={firstMessage}
+                  onChange={(e) => setFirstMessage(e.target.value)}
+                  className="vapi-prompt-textarea vapi-first-msg-textarea"
+                  placeholder="e.g. Hello! Welcome to TTAKOUT. How can I help you today?"
+                  spellCheck="false"
+                />
+              </div>
+
+              <div className="vapi-field prompt-editor-container" style={{ marginTop: '1.5rem' }}>
+                <label className="vapi-field-label">System Prompt</label>
                 <textarea
                   value={systemPrompt}
                   onChange={(e) => setSystemPrompt(e.target.value)}
