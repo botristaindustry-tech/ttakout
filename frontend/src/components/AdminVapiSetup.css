@@ -119,9 +119,9 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
-  color: #e2e8f0;
+  color: #ffffff;
   font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', Courier, monospace;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.6;
   resize: vertical;
   transition: all 0.2s ease;
