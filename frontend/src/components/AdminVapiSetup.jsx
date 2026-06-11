@@ -58,6 +58,29 @@ export default function AdminVapiSetup() {
     }
   };
 
+  const handleSaveConfig = async () => {
+    setSaving(true);
+    setSaveMsg({ text: '', type: '' });
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/settings/vapi/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          vapi_api_key: vapiApiKey,
+          vapi_assistant_id: vapiAssistantId,
+          active_menu_file: activeMenuFile
+        })
+      });
+      if (!res.ok) throw new Error('Failed to update config');
+      setSaveMsg({ text: 'Config saved! Loading agent prompt...', type: 'success' });
+      fetchVapiSettings(); // Fetch the new prompt for the updated agent
+    } catch (err) {
+      setSaveMsg({ text: err.message, type: 'error' });
+      setSaving(false);
+    }
+  };
+
   const handleSavePrompt = async () => {
     setSaving(true);
     setSaveMsg({ text: '', type: '' });
@@ -68,10 +91,7 @@ export default function AdminVapiSetup() {
         credentials: 'include',
         body: JSON.stringify({ 
           systemPrompt, 
-          firstMessage,
-          vapi_api_key: vapiApiKey,
-          vapi_assistant_id: vapiAssistantId,
-          active_menu_file: activeMenuFile
+          firstMessage
         })
       });
       const data = await res.json();
@@ -152,8 +172,8 @@ export default function AdminVapiSetup() {
               </select>
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <button className="btn btn-outline" onClick={handleSavePrompt} disabled={saving} style={{ width: '100%' }}>
-                {saving ? 'Updating Config...' : 'Apply Config Settings'}
+              <button className="btn btn-outline" onClick={handleSaveConfig} disabled={saving} style={{ width: '100%' }}>
+                {saving ? 'Updating Config...' : 'Apply Config Settings & Load Prompt'}
               </button>
             </div>
           </div>

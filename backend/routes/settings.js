@@ -91,13 +91,11 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
   }
 });
 
-// POST /api/v1/settings/vapi/prompt
-// Update Vapi system prompt and save config to DB
-router.post('/vapi/prompt', requireAdmin, async (req, res) => {
+// POST /api/v1/settings/vapi/config
+// Update just the API key, assistant ID, and menu file
+router.post('/vapi/config', requireAdmin, async (req, res) => {
   try {
-    const { systemPrompt, firstMessage, vapi_api_key, vapi_assistant_id, active_menu_file } = req.body;
-    
-    // Save settings to DB
+    const { vapi_api_key, vapi_assistant_id, active_menu_file } = req.body;
     if (vapi_api_key) {
       await pool.query(`INSERT INTO app_settings (key, value) VALUES ('vapi_api_key', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [JSON.stringify(vapi_api_key)]);
     }
@@ -108,6 +106,18 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
       await pool.query(`INSERT INTO app_settings (key, value) VALUES ('active_menu_file', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [JSON.stringify(active_menu_file)]);
       menuService.setActiveMenuFile(active_menu_file);
     }
+    res.json({ success: true, message: 'Config updated successfully' });
+  } catch (err) {
+    console.error('Error updating VAPI config:', err);
+    res.status(500).json({ error: 'Internal server error while updating config' });
+  }
+});
+
+// POST /api/v1/settings/vapi/prompt
+// Update Vapi system prompt
+router.post('/vapi/prompt', requireAdmin, async (req, res) => {
+  try {
+    const { systemPrompt, firstMessage } = req.body;
 
     const config = await getVapiConfig();
     const vapiApiKey = config.vapi_api_key;
@@ -129,27 +139,24 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
 
     const currentData = await getResponse.json();
 
+    // Create a minimalistic patch payload
+    const patchPayload = { model: currentData.model };
+    
     // Safely update the system prompt
-    if (currentData.model?.messages && Array.isArray(currentData.model.messages)) {
-      const sysIndex = currentData.model.messages.findIndex(m => m.role === 'system');
+    if (patchPayload.model?.messages && Array.isArray(patchPayload.model.messages)) {
+      const sysIndex = patchPayload.model.messages.findIndex(m => m.role === 'system');
       if (sysIndex !== -1) {
-        currentData.model.messages[sysIndex].content = systemPrompt;
+        patchPayload.model.messages[sysIndex].content = systemPrompt;
       } else {
-        currentData.model.messages.unshift({ role: 'system', content: systemPrompt });
+        patchPayload.model.messages.unshift({ role: 'system', content: systemPrompt });
       }
-    } else if (currentData.model) {
-      currentData.model.systemPrompt = systemPrompt;
+    } else if (patchPayload.model) {
+      patchPayload.model.systemPrompt = systemPrompt;
     }
 
     if (firstMessage !== undefined) {
-      currentData.firstMessage = firstMessage;
+      patchPayload.firstMessage = firstMessage;
     }
-
-    // Remove read-only fields before sending back the full assistant object
-    delete currentData.id;
-    delete currentData.orgId;
-    delete currentData.createdAt;
-    delete currentData.updatedAt;
 
     const response = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
       method: 'PATCH',
@@ -157,7 +164,7 @@ router.post('/vapi/prompt', requireAdmin, async (req, res) => {
         'Authorization': `Bearer ${vapiApiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(currentData)
+      body: JSON.stringify(patchPayload)
     });
 
     if (!response.ok) {
