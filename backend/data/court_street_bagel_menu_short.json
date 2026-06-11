@@ -1,0 +1,518 @@
+{
+  "restaurant": {
+    "name": "Court Street Bagels",
+    "currency": "USD"
+  },
+  "pickupEtaMinutesDefault": 20,
+  "categories": [
+    {
+      "name": "HAND ROLLED BAGELS",
+      "items": [
+        {
+          "id": "bagel_classic",
+          "name": "Classic Bagel",
+          "price": 2.0,
+          "modifiers": [
+            {
+              "id": "mod_classic_bagel_choice",
+              "name": "Bagel Choice",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_plain",
+                  "name": "Plain",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_everything",
+                  "name": "Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_sesame",
+                  "name": "Sesame",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg",
+                  "name": "Egg",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_cinnamon_raisin",
+                  "name": "Cinnamon Raisin",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat_everything",
+                  "name": "Whole Wheat Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_poppy",
+                  "name": "Poppy",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg_everything",
+                  "name": "Egg Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat",
+                  "name": "Whole Wheat",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_pumpernickel",
+                  "name": "Pumpernickel",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_onion",
+                  "name": "Onion",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_multigrain",
+                  "name": "Multigrain",
+                  "price": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bagel_classic_half_dozen",
+          "name": "Half Dozen Classic Bagels",
+          "price": 12.0,
+          "description": "Buy 6 Get 1 Free (7 Bagels total)",
+          "modifiers": [
+            {
+              "id": "mod_half_dozen_choices",
+              "name": "Choose 7 Bagels (Buy 6 Get 1 Free)",
+              "type": "multiple",
+              "minSelections": 7,
+              "maxSelections": 7,
+              "options": [
+                {
+                  "id": "opt_plain",
+                  "name": "Plain",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_everything",
+                  "name": "Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_sesame",
+                  "name": "Sesame",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg",
+                  "name": "Egg",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_cinnamon_raisin",
+                  "name": "Cinnamon Raisin",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat_everything",
+                  "name": "Whole Wheat Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_poppy",
+                  "name": "Poppy",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg_everything",
+                  "name": "Egg Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat",
+                  "name": "Whole Wheat",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_pumpernickel",
+                  "name": "Pumpernickel",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_onion",
+                  "name": "Onion",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_multigrain",
+                  "name": "Multigrain",
+                  "price": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bagel_classic_dozen",
+          "name": "Dozen Classic Bagels",
+          "price": 24.0,
+          "description": "Buy 12 Get 2 Free (14 Bagels total)",
+          "modifiers": [
+            {
+              "id": "mod_dozen_choices",
+              "name": "Choose 14 Bagels (Buy 12 Get 2 Free)",
+              "type": "multiple",
+              "minSelections": 14,
+              "maxSelections": 14,
+              "options": [
+                {
+                  "id": "opt_plain",
+                  "name": "Plain",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_everything",
+                  "name": "Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_sesame",
+                  "name": "Sesame",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg",
+                  "name": "Egg",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_cinnamon_raisin",
+                  "name": "Cinnamon Raisin",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat_everything",
+                  "name": "Whole Wheat Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_poppy",
+                  "name": "Poppy",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg_everything",
+                  "name": "Egg Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat",
+                  "name": "Whole Wheat",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_pumpernickel",
+                  "name": "Pumpernickel",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_onion",
+                  "name": "Onion",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_multigrain",
+                  "name": "Multigrain",
+                  "price": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bagel_specialty",
+          "name": "Specialty Bagel",
+          "price": 3.0,
+          "modifiers": [
+            {
+              "id": "mod_specialty_bagel_choice",
+              "name": "Specialty Bagel Choice",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_rainbow",
+                  "name": "Rainbow",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_blueberry",
+                  "name": "Blueberry",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_french_toast",
+                  "name": "French Toast",
+                  "price": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bagel_gluten_free",
+          "name": "Gluten Free Bagel",
+          "price": 3.0,
+          "modifiers": [
+            {
+              "id": "mod_gf_bagel_choice",
+              "name": "Gluten Free Bagel Choice",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_plain",
+                  "name": "Plain",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_everything",
+                  "name": "Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_sesame",
+                  "name": "Sesame",
+                  "price": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bagel_flagel",
+          "name": "Flagel",
+          "price": 3.0
+        },
+        {
+          "id": "bagel_mini",
+          "name": "Mini Bagel",
+          "price": 1.5
+        },
+        {
+          "id": "bagel_bialy",
+          "name": "Bialy",
+          "price": 2.5
+        }
+      ]
+    },
+    {
+      "name": "BAGEL PACKAGES",
+      "items": [
+        {
+          "id": "package_1",
+          "name": "Package #1",
+          "price": 20.0,
+          "description": "Half Dozen Bagels (7 Bagels), 1/2 LB of Plain Cream Cheese, Choice of 1/4 LB of Butter or Jelly",
+          "modifiers": [
+            {
+              "id": "mod_half_dozen_choices",
+              "name": "Choose 7 Bagels (Buy 6 Get 1 Free)",
+              "type": "multiple",
+              "minSelections": 7,
+              "maxSelections": 7,
+              "options": [
+                {
+                  "id": "opt_plain",
+                  "name": "Plain",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_everything",
+                  "name": "Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_sesame",
+                  "name": "Sesame",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg",
+                  "name": "Egg",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_cinnamon_raisin",
+                  "name": "Cinnamon Raisin",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat_everything",
+                  "name": "Whole Wheat Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_poppy",
+                  "name": "Poppy",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg_everything",
+                  "name": "Egg Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat",
+                  "name": "Whole Wheat",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_pumpernickel",
+                  "name": "Pumpernickel",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_onion",
+                  "name": "Onion",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_multigrain",
+                  "name": "Multigrain",
+                  "price": 0.0
+                }
+              ]
+            },
+            {
+              "id": "mod_package_1_spread",
+              "name": "Choice of 1/4 LB Spread",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_pkg1_butter",
+                  "name": "1/4 LB Butter",
+                  "price": 0
+                },
+                {
+                  "id": "opt_pkg1_jelly",
+                  "name": "1/4 LB Jelly",
+                  "price": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "package_2",
+          "name": "Package #2",
+          "price": 42.0,
+          "description": "Dozen Bagels (14 Bagels), 1 LB of Plain Cream Cheese, Choice of 1/2 LB of Scallion or Veggie Cream Cheese",
+          "modifiers": [
+            {
+              "id": "mod_dozen_choices",
+              "name": "Choose 14 Bagels (Buy 12 Get 2 Free)",
+              "type": "multiple",
+              "minSelections": 14,
+              "maxSelections": 14,
+              "options": [
+                {
+                  "id": "opt_plain",
+                  "name": "Plain",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_everything",
+                  "name": "Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_sesame",
+                  "name": "Sesame",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg",
+                  "name": "Egg",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_cinnamon_raisin",
+                  "name": "Cinnamon Raisin",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat_everything",
+                  "name": "Whole Wheat Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_poppy",
+                  "name": "Poppy",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_egg_everything",
+                  "name": "Egg Everything",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_whole_wheat",
+                  "name": "Whole Wheat",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_pumpernickel",
+                  "name": "Pumpernickel",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_onion",
+                  "name": "Onion",
+                  "price": 0.0
+                },
+                {
+                  "id": "opt_multigrain",
+                  "name": "Multigrain",
+                  "price": 0.0
+                }
+              ]
+            },
+            {
+              "id": "mod_package_2_spread",
+              "name": "Choice of 1/2 LB Spread",
+              "type": "single",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "options": [
+                {
+                  "id": "opt_pkg2_scallion",
+                  "name": "1/2 LB Scallion Cream Cheese",
+                  "price": 0
+                },
+                {
+                  "id": "opt_pkg2_veggie",
+                  "name": "1/2 LB Veggie Cream Cheese",
+                  "price": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
