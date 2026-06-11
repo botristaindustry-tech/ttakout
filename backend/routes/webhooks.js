@@ -222,13 +222,15 @@ module.exports = (io) => {
                    // Handle generic "Combo" mentions mapping to the "Yes" option
                    const isNoCombo = notesLower.includes("no combo") || notesLower.includes("without combo");
                    const isYesCombo = notesLower.includes("combo") || notesLower.includes("yes");
-                   if (isComboMod && !isNoCombo && isYesCombo) {
-                     const comboOption = mod.options[0];
-                     if (comboOption) {
-                       price += comboOption.price;
-                       parsedModifiers.push({ name: mod.name, option: comboOption.name, price: comboOption.price });
-                     }
-                   } else {
+                    if (isComboMod && !isNoCombo && isYesCombo) {
+                      const comboOption = mod.options[0];
+                      if (comboOption) {
+                        price += comboOption.price;
+                        if (comboOption.price > 0) {
+                          parsedModifiers.push({ name: mod.name, option: comboOption.name, price: comboOption.price });
+                        }
+                      }
+                    } else {
                       // Check if any specific option name was mentioned in the notes (can be 0 price or greater)
                       mod.options.forEach(opt => {
                         const optNameLower = opt.name.toLowerCase();
@@ -279,7 +281,11 @@ module.exports = (io) => {
 
                           if (matches) {
                             price += opt.price;
-                            parsedModifiers.push({ name: mod.name, option: opt.name, price: opt.price });
+                            // Only push to parsedModifiers if there's an upcharge. 
+                            // $0 items (like bagel flavors or no-onions) will just be covered by the combinedNotes text.
+                            if (opt.price > 0) {
+                              parsedModifiers.push({ name: mod.name, option: opt.name, price: opt.price });
+                            }
                           }
                         }
                       });
