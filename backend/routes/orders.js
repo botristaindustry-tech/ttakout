@@ -29,7 +29,7 @@ module.exports = (io) => {
                    AND RIGHT(regexp_replace(fp.phone_number, '[^0-9]', '', 'g'), 10) = RIGHT(regexp_replace(o.customer_phone, '[^0-9]', '', 'g'), 10)
                ) AS is_flagged
         FROM orders o 
-        ORDER BY created_at ASC;
+        ORDER BY created_at DESC;
       `;
       const { rows: orders } = await db.query(ordersQuery);
       

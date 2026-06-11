@@ -15,9 +15,15 @@ export default function AdminVapiSetup() {
   const [activeMenuFile, setActiveMenuFile] = useState('');
   const [menuFiles, setMenuFiles] = useState([]);
 
+  // Credit balance state
+  const [creditInfo, setCreditInfo] = useState(null);
+  const [creditLoading, setCreditLoading] = useState(false);
+  const [creditDismissed, setCreditDismissed] = useState(false);
+
   useEffect(() => {
     fetchVapiSettings();
     fetchMenuFiles();
+    fetchCreditBalance();
   }, []);
 
   const fetchVapiSettings = () => {
@@ -56,6 +62,22 @@ export default function AdminVapiSetup() {
     } catch (err) {
       console.error('Error fetching menu files:', err);
     }
+  };
+
+  const fetchCreditBalance = async () => {
+    setCreditLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/settings/vapi/credits`, {
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCreditInfo(data);
+      }
+    } catch (err) {
+      console.error('Error fetching VAPI credit balance:', err);
+    }
+    setCreditLoading(false);
   };
 
   const handleSaveConfig = async () => {
@@ -111,12 +133,38 @@ export default function AdminVapiSetup() {
     return <div className="vapi-setup-loading">Connecting to VAPI...</div>;
   }
 
+  // Determine credit warning status
+  const showCreditWarning = creditInfo && creditInfo.configured && creditInfo.balance !== null && creditInfo.balance < 8 && !creditDismissed;
+
   return (
     <div className="vapi-setup-page">
       <h1>AI Agent Configuration</h1>
       <p className="vapi-setup-subtitle">
         Manage the system prompt and instructions for your VAPI voice agent. Changes here are synced instantly to VAPI.
       </p>
+
+      {/* Low Credit Warning Banner */}
+      {showCreditWarning && (
+        <div className="vapi-credit-warning-banner">
+          <div className="vapi-credit-warning-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div className="vapi-credit-warning-content">
+            <strong>⚠️ VAPI Credit Balance Low!</strong>
+            <p>Your VAPI account balance is <span className="vapi-credit-amount">${Number(creditInfo.balance).toFixed(2)}</span> — below the $8.00 minimum threshold. Your AI phone agent may stop working if credits run out. <a href="https://dashboard.vapi.ai" target="_blank" rel="noopener noreferrer">Add credits on the VAPI Dashboard →</a></p>
+          </div>
+          <button className="vapi-credit-dismiss" onClick={() => setCreditDismissed(true)} title="Dismiss">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       <div className="vapi-setup-grid">
         {/* Left: Settings Form */}
@@ -216,8 +264,69 @@ export default function AdminVapiSetup() {
           )}
         </div>
 
-        {/* Right: Info and Tips */}
+        {/* Right: Info, Credits, and Tips */}
         <div className="vapi-setup-card tips-card">
+          {/* Credit Balance Widget */}
+          <div className="vapi-credit-widget">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              VAPI Credit Balance
+            </h2>
+
+            {creditLoading ? (
+              <div className="vapi-credit-loading">Checking balance...</div>
+            ) : creditInfo ? (
+              <div className="vapi-credit-display">
+                {creditInfo.error ? (
+                  <div className="vapi-credit-error">
+                    <p>{creditInfo.error}</p>
+                  </div>
+                ) : creditInfo.balance !== null ? (
+                  <>
+                    <div className={`vapi-credit-balance-card ${creditInfo.lowCredit ? 'low' : 'ok'}`}>
+                      <span className="vapi-credit-label">Current Balance</span>
+                      <span className="vapi-credit-value">${Number(creditInfo.balance).toFixed(2)}</span>
+                      {creditInfo.lowCredit && (
+                        <span className="vapi-credit-status low">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                          Below $8 threshold
+                        </span>
+                      )}
+                      {!creditInfo.lowCredit && (
+                        <span className="vapi-credit-status ok">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                          Healthy
+                        </span>
+                      )}
+                    </div>
+                    {creditInfo.plan && (
+                      <div className="vapi-credit-plan">Plan: {creditInfo.plan}</div>
+                    )}
+                  </>
+                ) : (
+                  <div className="vapi-credit-unavailable">
+                    <p>Balance data unavailable via API.</p>
+                    <a href="https://dashboard.vapi.ai" target="_blank" rel="noopener noreferrer" className="vapi-dashboard-link">
+                      Check on VAPI Dashboard →
+                    </a>
+                  </div>
+                )}
+                <button className="btn btn-outline vapi-refresh-btn" onClick={fetchCreditBalance} disabled={creditLoading}>
+                  {creditLoading ? 'Checking...' : '↻ Refresh Balance'}
+                </button>
+              </div>
+            ) : (
+              <div className="vapi-credit-unavailable">
+                <p>Configure your VAPI API Key to check credit balance.</p>
+              </div>
+            )}
+          </div>
+
+          <hr className="vapi-section-divider" />
+
           <h2>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             Prompting Best Practices

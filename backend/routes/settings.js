@@ -91,6 +91,63 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
   }
 });
 
+// GET /api/v1/settings/vapi/credits
+// Check VAPI account credit balance
+router.get('/vapi/credits', requireAdmin, async (req, res) => {
+  try {
+    const config = await getVapiConfig();
+    const vapiApiKey = config.vapi_api_key;
+
+    if (!vapiApiKey) {
+      return res.json({ configured: false, error: 'VAPI API Key is not configured.' });
+    }
+
+    // Try the /org endpoint first to get org-level billing data
+    const orgResponse = await fetch('https://api.vapi.ai/org', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${vapiApiKey}`
+      }
+    });
+
+    if (orgResponse.ok) {
+      const orgData = await orgResponse.json();
+      // Look for common balance/credit fields in the org response
+      const balance = orgData.balance ?? orgData.credits ?? orgData.creditBalance ?? orgData.remainingBalance ?? null;
+      const plan = orgData.plan ?? orgData.subscription?.plan ?? orgData.subscriptionType ?? null;
+      const name = orgData.name ?? orgData.orgName ?? null;
+
+      return res.json({
+        configured: true,
+        balance: balance,
+        plan: plan,
+        orgName: name,
+        lowCredit: balance !== null ? balance < 8 : null,
+        rawKeys: Object.keys(orgData) // Send keys so we can debug what fields are available
+      });
+    }
+
+    // If /org fails, try to estimate from recent call analytics
+    // Vapi doesn't have a public balance API, so we inform the user
+    if (orgResponse.status === 401) {
+      return res.json({
+        configured: false,
+        error: 'VAPI API key is invalid or expired. Please update your API key.'
+      });
+    }
+
+    return res.json({
+      configured: true,
+      balance: null,
+      error: `Unable to fetch credit info from VAPI (Status: ${orgResponse.status}). Check your dashboard at dashboard.vapi.ai for balance details.`
+    });
+
+  } catch (err) {
+    console.error('Error fetching VAPI credits:', err);
+    res.status(500).json({ error: 'Internal server error while checking VAPI credits' });
+  }
+});
+
 // POST /api/v1/settings/vapi/config
 // Update just the API key, assistant ID, and menu file
 router.post('/vapi/config', requireAdmin, async (req, res) => {

@@ -44,7 +44,7 @@ export const useOrderStore = create((set, get) => ({
     socket.on('new_order', (newOrder) => {
       console.log(`[Order Intake] New order received at ${new Date().toLocaleTimeString()} - ID: ${newOrder.id}`);
       set((state) => ({
-        orders: [...state.orders, newOrder]
+        orders: [newOrder, ...state.orders]
       }));
     });
 

@@ -229,7 +229,250 @@
   }
 }
 
+/* ============== VAPI Credit Balance Warning Banner ============== */
+
+.vapi-credit-warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(245, 158, 11, 0.08));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  margin-bottom: 2rem;
+  animation: creditPulse 3s ease-in-out infinite, fadeIn 0.5s ease-out;
+  position: relative;
+}
+
+.vapi-credit-warning-icon {
+  flex-shrink: 0;
+  color: #ef4444;
+  margin-top: 2px;
+  animation: warningBounce 2s ease-in-out infinite;
+}
+
+.vapi-credit-warning-content {
+  flex: 1;
+}
+
+.vapi-credit-warning-content strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #fca5a5;
+  margin-bottom: 0.4rem;
+}
+
+.vapi-credit-warning-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #fcd5ce;
+  line-height: 1.5;
+}
+
+.vapi-credit-warning-content a {
+  color: #fbbf24;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.vapi-credit-warning-content a:hover {
+  color: #fde68a;
+  text-decoration: underline;
+}
+
+.vapi-credit-amount {
+  font-weight: 700;
+  color: #ef4444;
+  font-size: 1.05em;
+}
+
+.vapi-credit-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.vapi-credit-dismiss:hover {
+  color: #f87171;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ============== VAPI Credit Balance Widget (Sidebar) ============== */
+
+.vapi-credit-widget {
+  margin-bottom: 0.5rem;
+}
+
+.vapi-credit-loading {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.vapi-credit-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vapi-credit-balance-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 1rem;
+  border-radius: 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.vapi-credit-balance-card.ok {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.vapi-credit-balance-card.low {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  animation: lowCreditGlow 2.5s ease-in-out infinite;
+}
+
+.vapi-credit-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+.vapi-credit-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.vapi-credit-balance-card.ok .vapi-credit-value {
+  color: #10b981;
+}
+
+.vapi-credit-balance-card.low .vapi-credit-value {
+  color: #ef4444;
+}
+
+.vapi-credit-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vapi-credit-status.ok {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.vapi-credit-status.low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  animation: statusBlink 2s ease-in-out infinite;
+}
+
+.vapi-credit-plan {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.vapi-credit-error {
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #fca5a5;
+}
+
+.vapi-credit-error p {
+  margin: 0;
+}
+
+.vapi-credit-unavailable {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.vapi-credit-unavailable p {
+  margin: 0 0 0.5rem 0;
+}
+
+.vapi-dashboard-link {
+  display: inline-block;
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.vapi-dashboard-link:hover {
+  color: var(--accent-secondary);
+  text-decoration: underline;
+}
+
+.vapi-refresh-btn {
+  font-size: 0.85rem !important;
+  padding: 0.5rem 1rem !important;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.vapi-section-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5rem 0;
+}
+
+/* ============== Animations ============== */
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes creditPulse {
+  0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  50% { border-color: rgba(239, 68, 68, 0.7); box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }
+}
+
+@keyframes warningBounce {
+  0%, 100% { transform: translateY(0); }
+  15% { transform: translateY(-3px); }
+  30% { transform: translateY(0); }
+}
+
+@keyframes lowCreditGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.08); }
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
