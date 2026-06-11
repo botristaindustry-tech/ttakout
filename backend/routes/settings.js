@@ -10,6 +10,21 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+const menuService = require('../services/menuService');
+
+async function getVapiConfig() {
+  const result = await pool.query('SELECT key, value FROM app_settings WHERE key IN ($1, $2, $3)', ['vapi_api_key', 'vapi_assistant_id', 'active_menu_file']);
+  const config = {
+    vapi_api_key: process.env.VAPI_API_KEY,
+    vapi_assistant_id: process.env.VAPI_ASSISTANT_ID,
+    active_menu_file: 'menu.json'
+  };
+  result.rows.forEach(row => {
+    if (row.value) config[row.key] = row.value;
+  });
+  return config;
+}
+
 // GET /api/v1/settings
 // Fetch all settings as a single object
 router.get('/', requireAdmin, async (req, res) => {
@@ -27,14 +42,15 @@ router.get('/', requireAdmin, async (req, res) => {
 });
 
 // GET /api/v1/settings/vapi/prompt
-// Fetch current Vapi system prompt
+// Fetch current Vapi system prompt and config
 router.get('/vapi/prompt', requireAdmin, async (req, res) => {
   try {
-    const vapiApiKey = process.env.VAPI_API_KEY;
-    const vapiAssistantId = process.env.VAPI_ASSISTANT_ID;
+    const config = await getVapiConfig();
+    const vapiApiKey = config.vapi_api_key;
+    const vapiAssistantId = config.vapi_assistant_id;
 
     if (!vapiApiKey || !vapiAssistantId) {
-      return res.json({ configured: false });
+      return res.json({ configured: false, active_menu_file: config.active_menu_file });
     }
 
     const response = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
@@ -64,7 +80,10 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
       configured: true,
       name: data.name,
       firstMessage: data.firstMessage || '',
-      systemPrompt: systemPrompt
+      systemPrompt: systemPrompt,
+      vapi_api_key: vapiApiKey,
+      vapi_assistant_id: vapiAssistantId,
+      active_menu_file: config.active_menu_file
     });
   } catch (err) {
     console.error('Error fetching VAPI prompt:', err);
@@ -73,16 +92,29 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
 });
 
 // POST /api/v1/settings/vapi/prompt
-// Update Vapi system prompt
+// Update Vapi system prompt and save config to DB
 router.post('/vapi/prompt', requireAdmin, async (req, res) => {
   try {
-    const { systemPrompt, firstMessage } = req.body;
+    const { systemPrompt, firstMessage, vapi_api_key, vapi_assistant_id, active_menu_file } = req.body;
     
-    const vapiApiKey = process.env.VAPI_API_KEY;
-    const vapiAssistantId = process.env.VAPI_ASSISTANT_ID;
+    // Save settings to DB
+    if (vapi_api_key) {
+      await pool.query(`INSERT INTO app_settings (key, value) VALUES ('vapi_api_key', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [JSON.stringify(vapi_api_key)]);
+    }
+    if (vapi_assistant_id) {
+      await pool.query(`INSERT INTO app_settings (key, value) VALUES ('vapi_assistant_id', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [JSON.stringify(vapi_assistant_id)]);
+    }
+    if (active_menu_file) {
+      await pool.query(`INSERT INTO app_settings (key, value) VALUES ('active_menu_file', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [JSON.stringify(active_menu_file)]);
+      menuService.setActiveMenuFile(active_menu_file);
+    }
+
+    const config = await getVapiConfig();
+    const vapiApiKey = config.vapi_api_key;
+    const vapiAssistantId = config.vapi_assistant_id;
 
     if (!vapiApiKey || !vapiAssistantId) {
-      return res.status(400).json({ error: 'VAPI API Key and Assistant ID must be configured in environment variables' });
+      return res.status(400).json({ error: 'VAPI API Key and Assistant ID must be configured in environment variables or settings' });
     }
 
     // First, fetch the current assistant to ensure we don't overwrite the whole model config

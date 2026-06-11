@@ -10,7 +10,17 @@ export default function AdminVapiSetup() {
   const [systemPrompt, setSystemPrompt] = useState('');
   const [assistantName, setAssistantName] = useState('');
 
+  const [vapiApiKey, setVapiApiKey] = useState('');
+  const [vapiAssistantId, setVapiAssistantId] = useState('');
+  const [activeMenuFile, setActiveMenuFile] = useState('');
+  const [menuFiles, setMenuFiles] = useState([]);
+
   useEffect(() => {
+    fetchVapiSettings();
+    fetchMenuFiles();
+  }, []);
+
+  const fetchVapiSettings = () => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/settings/vapi/prompt`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
@@ -22,6 +32,9 @@ export default function AdminVapiSetup() {
         } else {
           setConfigured(false);
         }
+        setVapiApiKey(data.vapi_api_key || '');
+        setVapiAssistantId(data.vapi_assistant_id || '');
+        setActiveMenuFile(data.active_menu_file || 'menu.json');
         setLoading(false);
       })
       .catch(err => {
@@ -29,7 +42,21 @@ export default function AdminVapiSetup() {
         setSaveMsg({ text: 'Error connecting to server to fetch VAPI settings.', type: 'error' });
         setLoading(false);
       });
-  }, []);
+  };
+
+  const fetchMenuFiles = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu/files`, {
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMenuFiles(data);
+      }
+    } catch (err) {
+      console.error('Error fetching menu files:', err);
+    }
+  };
 
   const handleSavePrompt = async () => {
     setSaving(true);
@@ -39,7 +66,13 @@ export default function AdminVapiSetup() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ systemPrompt, firstMessage })
+        body: JSON.stringify({ 
+          systemPrompt, 
+          firstMessage,
+          vapi_api_key: vapiApiKey,
+          vapi_assistant_id: vapiAssistantId,
+          active_menu_file: activeMenuFile
+        })
       });
       const data = await res.json();
       
@@ -82,10 +115,50 @@ export default function AdminVapiSetup() {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <div>
                 <strong>VAPI is not configured.</strong>
-                <p>Please ensure `VAPI_API_KEY` and `VAPI_ASSISTANT_ID` are set in the backend environment variables.</p>
+                <p>Please provide the VAPI API Key and Assistant ID below.</p>
               </div>
             </div>
-          ) : (
+          ) : null}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px' }}>
+            <div className="vapi-field">
+              <label className="vapi-field-label">VAPI API Key</label>
+              <input
+                type="password"
+                value={vapiApiKey}
+                onChange={(e) => setVapiApiKey(e.target.value)}
+                className="form-input"
+                placeholder="sk-..."
+              />
+            </div>
+            <div className="vapi-field">
+              <label className="vapi-field-label">VAPI Assistant ID</label>
+              <input
+                type="text"
+                value={vapiAssistantId}
+                onChange={(e) => setVapiAssistantId(e.target.value)}
+                className="form-input"
+                placeholder="e.g. fd4b..."
+              />
+            </div>
+            <div className="vapi-field" style={{ gridColumn: 'span 2' }}>
+              <label className="vapi-field-label">Active Menu File</label>
+              <select
+                value={activeMenuFile}
+                onChange={(e) => setActiveMenuFile(e.target.value)}
+                className="form-input"
+              >
+                {menuFiles.map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+            </div>
+            <div style={{ gridColumn: 'span 2' }}>
+              <button className="btn btn-outline" onClick={handleSavePrompt} disabled={saving} style={{ width: '100%' }}>
+                {saving ? 'Updating Config...' : 'Apply Config Settings'}
+              </button>
+            </div>
+          </div>
+
+          {configured && (
             <>
               <div className="vapi-field">
                 <label className="vapi-field-label">First Message</label>

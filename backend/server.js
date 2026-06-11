@@ -171,4 +171,20 @@ db.query('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check')
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Initialize MenuService with active file from DB
+  const menuService = require('./services/menuService');
+  db.query("SELECT value FROM app_settings WHERE key = 'active_menu_file'")
+    .then(res => {
+      if (res.rows.length > 0 && res.rows[0].value) {
+        // Strip quotes if any due to JSON stringification
+        let filename = res.rows[0].value;
+        if (typeof filename === 'string' && filename.startsWith('"')) {
+           filename = JSON.parse(filename);
+        }
+        menuService.setActiveMenuFile(filename);
+        console.log(`[Init] Loaded active menu file: ${filename}`);
+      }
+    })
+    .catch(err => console.error('Error loading active menu file:', err));
 });

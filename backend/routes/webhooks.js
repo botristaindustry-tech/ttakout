@@ -52,10 +52,16 @@ module.exports = (io) => {
           return res.status(200).json({ error: "Unable to verify caller ID. Goodbye." });
         }
 
-        const assistantId = process.env.VAPI_ASSISTANT_ID;
+        const configQuery = await db.query("SELECT value FROM app_settings WHERE key = 'vapi_assistant_id'");
+        let assistantId = process.env.VAPI_ASSISTANT_ID;
+        if (configQuery.rows.length > 0 && configQuery.rows[0].value) {
+          assistantId = typeof configQuery.rows[0].value === 'string' && configQuery.rows[0].value.startsWith('"')
+            ? JSON.parse(configQuery.rows[0].value)
+            : configQuery.rows[0].value;
+        }
         
         if (!assistantId) {
-          console.error("[VAPI] VAPI_ASSISTANT_ID is not configured in the environment.");
+          console.error("[VAPI] VAPI_ASSISTANT_ID is not configured in the environment or settings.");
           return res.status(500).json({ error: "Configuration missing" });
         }
 

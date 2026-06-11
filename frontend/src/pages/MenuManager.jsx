@@ -14,14 +14,44 @@ export default function MenuManager() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editCategoryName, setEditCategoryName] = useState('');
 
+  // File selection state
+  const [menuFiles, setMenuFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState('menu.json');
+
   useEffect(() => {
-    fetchMenu();
+    fetchMenuFiles();
   }, []);
+
+  useEffect(() => {
+    if (selectedFile) {
+      fetchMenu();
+    }
+  }, [selectedFile]);
+
+  const fetchMenuFiles = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu/files`, {
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMenuFiles(data);
+        if (data.length > 0 && !data.includes(selectedFile)) {
+          setSelectedFile(data[0]);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching menu files:', err);
+    }
+  };
 
   const fetchMenu = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu`, {
+      const url = new URL(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu`);
+      if (selectedFile) url.searchParams.append('file', selectedFile);
+      
+      const res = await fetch(url.toString(), {
         credentials: 'include'
       });
       if (res.ok) {
@@ -43,7 +73,10 @@ export default function MenuManager() {
   const saveMenu = async (updatedMenu) => {
     try {
       setSaving(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu`, {
+      const url = new URL(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu`);
+      if (selectedFile) url.searchParams.append('file', selectedFile);
+
+      const res = await fetch(url.toString(), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -130,8 +163,19 @@ export default function MenuManager() {
     setMenu(updated);
   };
 
-  if (loading) return <div className="menu-manager-page"><p>Loading menu...</p></div>;
-  if (!menu) return <div className="menu-manager-page"><p>No menu data found.</p></div>;
+  const handleCreateNewFile = () => {
+    const filename = prompt("Enter new file name (e.g., menu_summer.json):");
+    if (filename && filename.trim()) {
+      let finalName = filename.trim();
+      if (!finalName.endsWith('.json')) finalName += '.json';
+      
+      setMenuFiles([...menuFiles, finalName]);
+      setSelectedFile(finalName);
+      setMenu({ categories: [] });
+    }
+  };
+
+  if (loading && !menu) return <div className="menu-manager-page"><p>Loading menu...</p></div>;
 
   return (
     <div className="menu-manager-page">
@@ -141,8 +185,20 @@ export default function MenuManager() {
           <p className="menu-manager-subtitle">Update pricing, add items, and manage out-of-stock items for AI ordering.</p>
         </div>
         <div className="controls-row">
-          <button className="btn btn-outline" onClick={handleAddCategory}>+ New Category</button>
-          <button className="btn btn-primary" onClick={() => saveMenu(menu)} disabled={saving}>
+          <div className="file-selector" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <label>Menu File:</label>
+            <select 
+              value={selectedFile} 
+              onChange={e => setSelectedFile(e.target.value)}
+              className="form-input"
+              style={{ width: 'auto', display: 'inline-block' }}
+            >
+              {menuFiles.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <button className="btn btn-outline" onClick={handleCreateNewFile}>+ New File</button>
+          </div>
+          <button className="btn btn-outline" onClick={handleAddCategory} disabled={!menu}>+ New Category</button>
+          <button className="btn btn-primary" onClick={() => saveMenu(menu)} disabled={saving || !menu}>
             {saving ? 'Saving...' : 'Save All Changes'}
           </button>
         </div>

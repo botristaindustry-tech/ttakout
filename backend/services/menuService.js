@@ -4,16 +4,29 @@ const Fuse = require('fuse.js');
 
 class MenuService {
   constructor() {
-    this.menuDataPath = path.join(__dirname, '../data/menu.json');
+    this.activeMenuFile = 'menu.json';
+    this.menuDataPath = path.join(__dirname, '../data', this.activeMenuFile);
     this.menuData = [];
     this.fuse = null;
     this.rawMenu = null;
     this.loadMenu();
   }
 
+  setActiveMenuFile(filename) {
+    if (!filename) return;
+    this.activeMenuFile = filename;
+    this.menuDataPath = path.join(__dirname, '../data', this.activeMenuFile);
+    this.loadMenu();
+  }
+
   loadMenu() {
     try {
-      this.rawMenu = JSON.parse(fs.readFileSync(this.menuDataPath, 'utf-8'));
+      if (!fs.existsSync(this.menuDataPath)) {
+        // If it doesn't exist, start with an empty menu
+        this.rawMenu = { categories: [] };
+      } else {
+        this.rawMenu = JSON.parse(fs.readFileSync(this.menuDataPath, 'utf-8'));
+      }
       this.menuData = [];
       
       // If the menu has categories, flatten them into a single array of items for searching
@@ -48,6 +61,33 @@ class MenuService {
   saveRawMenu(newMenu) {
     fs.writeFileSync(this.menuDataPath, JSON.stringify(newMenu, null, 2), 'utf-8');
     this.loadMenu(); // Refresh in-memory structures and search index
+  }
+
+  getMenuFiles() {
+    const dataDir = path.join(__dirname, '../data');
+    if (!fs.existsSync(dataDir)) return [];
+    return fs.readdirSync(dataDir).filter(f => f.endsWith('.json'));
+  }
+
+  getMenuByFile(filename) {
+    if (!filename) return this.rawMenu;
+    const filePath = path.join(__dirname, '../data', path.basename(filename));
+    if (!fs.existsSync(filePath)) {
+      return { categories: [] };
+    }
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  }
+
+  saveMenuByFile(filename, newMenu) {
+    if (!filename) {
+      this.saveRawMenu(newMenu);
+      return;
+    }
+    const filePath = path.join(__dirname, '../data', path.basename(filename));
+    fs.writeFileSync(filePath, JSON.stringify(newMenu, null, 2), 'utf-8');
+    if (filename === 'menu.json') {
+      this.loadMenu(); // Refresh if active menu is updated
+    }
   }
   
   search(query) {
