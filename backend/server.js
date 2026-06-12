@@ -41,6 +41,35 @@ app.use((req, res, next) => {
   express.json()(req, res, next);
 });
 
+// Twilio A2P 10DLC Compliance Page (Public Proof of Opt-in)
+app.get('/sms-compliance', (req, res) => {
+  res.send(`
+    <html>
+      <body style="font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        <h1>SMS Opt-In & Compliance Documentation</h1>
+        <h3>Company: T-Takout</h3>
+        <p><strong>Opt-In Type:</strong> Verbal / Voice (Inbound Phone Call)</p>
+        <p><strong>Proof of Consent Process:</strong></p>
+        <ul>
+          <li>Customers initiate an inbound phone call to our business to place a food order.</li>
+          <li>During the call, the customer provides their mobile phone number to associate with the order.</li>
+          <li>If the order total exceeds our payment threshold, our phone agent informs the customer: <em>"Your order is placed! Since the total is over $50, I have just sent a secure payment link to your phone via text. Please complete it within 30 minutes so we can start cooking."</em></li>
+          <li>The customer verbally agrees or stays on the line to confirm.</li>
+          <li>We then send a single, transactional SMS containing the Stripe Checkout link to the number they provided.</li>
+        </ul>
+        <p><strong>Sample Message Sent:</strong></p>
+        <blockquote style="background: #f4f4f4; padding: 15px; border-left: 4px solid #333;">
+          Hi John! 👋 Your order #42 from T-Takout is ready for payment.<br><br>
+          🧾 Total: $67.50<br><br>
+          Tap to pay securely:<br>
+          https://checkout.stripe.com/pay/cs_test_123<br><br>
+          This link expires in 30 minutes. Your order will be prepared once payment is confirmed. Reply STOP to opt out.
+        </blockquote>
+      </body>
+    </html>
+  `);
+});
+
 // Trust proxy (Render runs behind a reverse proxy)
 app.set('trust proxy', 1);
 
