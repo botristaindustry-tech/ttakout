@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import FlaggedPhones from './pages/FlaggedPhones';
 import MenuManager from './pages/MenuManager';
 import AdminVapiSetup from './components/AdminVapiSetup';
+import AdminVapiBilling from './components/AdminVapiBilling';
 
 function ProtectedRoute({ user, requiredPermission, children, fallback }) {
   const perms = user?.permissions || [];
@@ -144,6 +145,13 @@ function SidebarDrawer({ isOpen, onClose, user }) {
                         onClick={handleNav}
                       >
                         AI Agent Prompt
+                      </Link>
+                      <Link
+                        to="/admin/settings/vapi-billing"
+                        className={`sidebar-item sub ${isActive('/admin/settings/vapi-billing') ? 'active' : ''}`}
+                        onClick={handleNav}
+                      >
+                        VAPI Billing & Logs
                       </Link>
                     </>
                   )}
@@ -296,6 +304,11 @@ function App() {
                       <Route path="/admin/settings/vapi" element={
                         <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
                           <AdminVapiSetup />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/settings/vapi-billing" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
+                          <AdminVapiBilling />
                         </ProtectedRoute>
                       } />
                       <Route path="/admin/dashboard" element={

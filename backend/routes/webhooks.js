@@ -89,6 +89,35 @@ module.exports = (io) => {
         }
       }
 
+      // Handle end-of-call billing tracking
+      if (msg?.type === 'end-of-call-report') {
+        const callId = msg.call?.id || body?.call?.id;
+        const cost = msg.call?.cost || body?.call?.cost || 0;
+        const endedReason = msg.endedReason || body?.endedReason || 'unknown';
+
+        if (callId) {
+          try {
+            // Log the call cost
+            await db.query(
+              `INSERT INTO vapi_calls (call_id, cost, ended_reason) VALUES ($1, $2, $3) ON CONFLICT (call_id) DO NOTHING`,
+              [callId, cost, endedReason]
+            );
+
+            // Decrement the credit balance safely in app_settings
+            await db.query(`
+              UPDATE app_settings 
+              SET value = (COALESCE(value::numeric, 0) - $1)::text 
+              WHERE key = 'vapi_credit_balance'
+            `, [cost]);
+
+            console.log(`[VAPI BILLING] Call ${callId} ended. Deducted $${cost} from credit balance.`);
+          } catch (err) {
+            console.error('[VAPI BILLING] Error updating billing for call:', err);
+          }
+        }
+        return res.status(200).json({ status: 'Recorded call cost' });
+      }
+
       if (msg?.type !== 'tool-calls' || !Array.isArray(msg.toolCallList)) {
         console.warn('Received non-tool-call webhook:', body);
         return res.status(202).json({ status: 'Accepted (ignored non-tool-call)' });

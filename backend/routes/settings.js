@@ -92,7 +92,7 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
 });
 
 // GET /api/v1/settings/vapi/credits
-// Check VAPI account credit balance
+// Check our internal VAPI account credit balance
 router.get('/vapi/credits', requireAdmin, async (req, res) => {
   try {
     const config = await getVapiConfig();
@@ -102,49 +102,76 @@ router.get('/vapi/credits', requireAdmin, async (req, res) => {
       return res.json({ configured: false, error: 'VAPI API Key is not configured.' });
     }
 
-    // Try the /org endpoint first to get org-level billing data
-    const orgResponse = await fetch('https://api.vapi.ai/org', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${vapiApiKey}`
-      }
-    });
-
-    if (orgResponse.ok) {
-      const orgData = await orgResponse.json();
-      // Look for common balance/credit fields in the org response
-      const balance = orgData.balance ?? orgData.credits ?? orgData.creditBalance ?? orgData.remainingBalance ?? null;
-      const plan = orgData.plan ?? orgData.subscription?.plan ?? orgData.subscriptionType ?? null;
-      const name = orgData.name ?? orgData.orgName ?? null;
-
-      return res.json({
-        configured: true,
-        balance: balance,
-        plan: plan,
-        orgName: name,
-        lowCredit: balance !== null ? balance < 8 : null,
-        rawKeys: Object.keys(orgData) // Send keys so we can debug what fields are available
-      });
-    }
-
-    // If /org fails, try to estimate from recent call analytics
-    // Vapi doesn't have a public balance API, so we inform the user
-    if (orgResponse.status === 401) {
-      return res.json({
-        configured: false,
-        error: 'VAPI API key is invalid or expired. Please update your API key.'
-      });
-    }
+    const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'vapi_credit_balance'");
+    const balance = rows.length > 0 ? parseFloat(rows[0].value) : 0;
 
     return res.json({
       configured: true,
-      balance: null,
-      error: `Unable to fetch credit info from VAPI (Status: ${orgResponse.status}). Check your dashboard at dashboard.vapi.ai for balance details.`
+      balance: balance,
+      plan: 'Internal Tracking',
+      orgName: 'TTAKOUT',
+      lowCredit: balance < 8
     });
 
   } catch (err) {
-    console.error('Error fetching VAPI credits:', err);
+    console.error('Error fetching internal VAPI credits:', err);
     res.status(500).json({ error: 'Internal server error while checking VAPI credits' });
+  }
+});
+
+// POST /api/v1/settings/vapi/credits/refill
+// Refill or set the internal credit budget
+router.post('/vapi/credits/refill', requireAdmin, async (req, res) => {
+  try {
+    const { amount, mode } = req.body; // mode: 'add' or 'set'
+    const value = parseFloat(amount) || 0;
+    
+    if (mode === 'add') {
+      await pool.query(`
+        INSERT INTO app_settings (key, value) 
+        VALUES ('vapi_credit_balance', $1)
+        ON CONFLICT (key) DO UPDATE 
+        SET value = (COALESCE(app_settings.value::numeric, 0) + $1)::text
+      `, [value]);
+    } else {
+      await pool.query(`
+        INSERT INTO app_settings (key, value) 
+        VALUES ('vapi_credit_balance', $1)
+        ON CONFLICT (key) DO UPDATE 
+        SET value = EXCLUDED.value
+      `, [value.toString()]);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error refilling budget:', err);
+    res.status(500).json({ error: 'Failed to refill budget' });
+  }
+});
+
+// GET /api/v1/settings/vapi/calls
+// Get history of vapi calls and total spend
+router.get('/vapi/calls', requireAdmin, async (req, res) => {
+  try {
+    const { rows: calls } = await pool.query(`
+      SELECT call_id, cost, ended_reason, created_at 
+      FROM vapi_calls 
+      ORDER BY created_at DESC 
+      LIMIT 100
+    `);
+    
+    const { rows: totalRows } = await pool.query(`
+      SELECT SUM(cost) as total_spend 
+      FROM vapi_calls
+    `);
+
+    res.json({
+      calls,
+      totalSpend: parseFloat(totalRows[0]?.total_spend || 0)
+    });
+  } catch (err) {
+    console.error('Error fetching VAPI calls:', err);
+    res.status(500).json({ error: 'Failed to fetch call history' });
   }
 });
 
