@@ -210,6 +210,82 @@ router.get('/vapi/calls/daily', requireAdmin, async (req, res) => {
   }
 });
 
+// POST /api/v1/settings/vapi/calls/sync
+// Pull call history from VAPI API and import any missing calls into local DB
+router.post('/vapi/calls/sync', requireAdmin, async (req, res) => {
+  try {
+    const config = await getVapiConfig();
+    const vapiApiKey = config.vapi_api_key;
+
+    if (!vapiApiKey) {
+      return res.status(400).json({ error: 'VAPI API key is not configured.' });
+    }
+
+    // Fetch up to 100 most recent calls from VAPI
+    const vapiRes = await fetch('https://api.vapi.ai/call?limit=100', {
+      headers: { 'Authorization': `Bearer ${vapiApiKey}` }
+    });
+
+    if (!vapiRes.ok) {
+      const txt = await vapiRes.text();
+      return res.status(502).json({ error: `VAPI API error: ${vapiRes.status} — ${txt}` });
+    }
+
+    const calls = await vapiRes.json();
+    const callList = Array.isArray(calls) ? calls : (calls.results || calls.data || []);
+
+    let imported = 0;
+    let skipped = 0;
+    let totalNewCost = 0;
+
+    for (const call of callList) {
+      const callId = call.id;
+      const cost = parseFloat(call.cost || call.costBreakdown?.total || 0);
+      const endedReason = call.endedReason || call.ended_reason || 'unknown';
+      const createdAt = call.createdAt || call.created_at || call.startedAt || new Date().toISOString();
+
+      if (!callId) continue;
+
+      // Upsert — skip if already tracked
+      const result = await pool.query(
+        `INSERT INTO vapi_calls (call_id, cost, ended_reason, created_at)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (call_id) DO NOTHING
+         RETURNING id`,
+        [callId, cost, endedReason, createdAt]
+      );
+
+      if (result.rows.length > 0) {
+        imported++;
+        totalNewCost += cost;
+      } else {
+        skipped++;
+      }
+    }
+
+    // Deduct newly imported cost from the tracked balance
+    if (totalNewCost > 0) {
+      await pool.query(`
+        UPDATE app_settings 
+        SET value = (COALESCE(value::numeric, 0) - $1)::text
+        WHERE key = 'vapi_credit_balance'
+      `, [totalNewCost]);
+    }
+
+    console.log(`[VAPI SYNC] Imported ${imported} new calls, skipped ${skipped} already tracked. Total new cost: $${totalNewCost.toFixed(4)}`);
+
+    res.json({
+      success: true,
+      imported,
+      skipped,
+      totalNewCost: parseFloat(totalNewCost.toFixed(4))
+    });
+
+  } catch (err) {
+    console.error('Error syncing VAPI calls:', err);
+    res.status(500).json({ error: 'Failed to sync calls from VAPI' });
+  }
+});
 
 // POST /api/v1/settings/vapi/config
 // Update just the API key, assistant ID, and menu file

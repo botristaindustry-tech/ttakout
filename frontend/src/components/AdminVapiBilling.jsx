@@ -56,6 +56,9 @@ export default function AdminVapiBilling() {
   const [refillMode, setRefillMode] = useState('add');
   const [refillSuccess, setRefillSuccess] = useState(false);
 
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+
   const fetchCreditBalance = useCallback(async () => {
     try {
       const res = await fetch(`${API()}/api/v1/settings/vapi/credits`, { credentials: 'include' });
@@ -93,6 +96,29 @@ export default function AdminVapiBilling() {
   useEffect(() => {
     fetchDayData(selectedDate);
   }, [selectedDate]);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch(`${API()}/api/v1/settings/vapi/calls/sync`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSyncResult({ ok: true, ...data });
+        // Refresh everything after sync
+        await Promise.all([fetchCreditBalance(), fetchDayData(selectedDate), fetchDailyStats()]);
+      } else {
+        setSyncResult({ ok: false, error: data.error || 'Sync failed' });
+      }
+    } catch (e) {
+      setSyncResult({ ok: false, error: 'Network error — is the server running?' });
+    }
+    setSyncing(false);
+    setTimeout(() => setSyncResult(null), 8000);
+  };
 
   const shiftDate = (days) => {
     const d = new Date(selectedDate + 'T12:00:00');
@@ -155,12 +181,33 @@ export default function AdminVapiBilling() {
           <h1>VAPI Billing & Logs</h1>
           <p className="vapi-billing-subtitle">Track AI call costs, monitor your budget, and browse daily call history.</p>
         </div>
-        <button className="btn btn-outline" onClick={() => {
-          fetchDailyStats();
-          fetchDayData(selectedDate);
-          fetchCreditBalance();
-        }}>↻ Refresh All</button>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            className={`btn btn-sync ${syncing ? 'syncing' : ''}`}
+            onClick={handleSync}
+            disabled={syncing}
+            title="Pull latest call history from VAPI and import any missing calls"
+          >
+            <span className={`sync-icon ${syncing ? 'spinning' : ''}`}>⟳</span>
+            {syncing ? 'Syncing from VAPI...' : 'Sync from VAPI'}
+          </button>
+          <button className="btn btn-outline" onClick={() => {
+            fetchDailyStats();
+            fetchDayData(selectedDate);
+            fetchCreditBalance();
+          }}>↻ Refresh All</button>
+        </div>
       </div>
+
+      {/* Sync Result Banner */}
+      {syncResult && (
+        <div className={`sync-result-banner ${syncResult.ok ? 'ok' : 'err'}`}>
+          {syncResult.ok
+            ? `✓ Sync complete — ${syncResult.imported} new call${syncResult.imported !== 1 ? 's' : ''} imported, ${syncResult.skipped} already tracked. New cost deducted: $${syncResult.totalNewCost.toFixed(4)}`
+            : `✗ Sync failed: ${syncResult.error}`
+          }
+        </div>
+      )}
 
       {/* Warning Banner */}
       {showWarning && (
