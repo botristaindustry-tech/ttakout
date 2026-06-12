@@ -288,7 +288,24 @@ export default function IngestionDashboard() {
                   <td>
                     {new Date(order.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td><span style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600 }}>💳 AWAITING PAYMENT</span></td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'flex-start' }}>
+                      <span style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600 }}>💳 AWAITING PAYMENT</span>
+                      {order.payment_url && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(order.payment_url);
+                            e.target.innerText = '✅ Copied!';
+                            setTimeout(() => e.target.innerText = '🔗 Copy Link', 2000);
+                          }}
+                          style={{ background: 'rgba(96,165,250,0.1)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.3)', padding: '0.15rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.7rem', cursor: 'pointer', transition: 'all 0.2s' }}
+                        >
+                          🔗 Copy Link
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {pendingPaymentOrders.length === 0 && (

@@ -483,6 +483,13 @@ module.exports = (io) => {
               try {
                 paymentUrl = await createCheckoutSession(newOrder, newOrder.lines);
                 console.log(`[Payment] Stripe session created for order #${newOrder.daily_order_code}: ${paymentUrl}`);
+                
+                // Save the payment link in the database so the frontend can display it
+                await db.query(
+                  "UPDATE orders SET payment_url = $1 WHERE id = $2",
+                  [paymentUrl, newOrder.id]
+                );
+                newOrder.payment_url = paymentUrl;
               } catch (stripeErr) {
                 console.error('[Payment] Stripe session creation failed:', stripeErr.message);
                 // Fallback: let the order proceed as normal PENDING so kitchen isn't blocked
