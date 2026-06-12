@@ -32,17 +32,25 @@ function BarChart({ data, valueKey, labelKey, color, formatValue }) {
   );
 }
 
-function toDateStr(date) {
-  return date.toISOString().split('T')[0];
+function getLocalDateStr(date) {
+  if (!(date instanceof Date)) date = new Date(date);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function formatShortDate(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
+  if (!dateStr) return '';
+  const str = String(dateStr);
+  const cleanDate = str.includes('T') ? str.split('T')[0] : str;
+  const d = new Date(cleanDate + 'T12:00:00');
+  if (isNaN(d.getTime())) return 'Invalid';
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 export default function AdminVapiBilling() {
-  const today = toDateStr(new Date());
+  const today = getLocalDateStr(new Date());
 
   const [selectedDate, setSelectedDate] = useState(today);
   const [creditInfo, setCreditInfo] = useState(null);
@@ -123,7 +131,7 @@ export default function AdminVapiBilling() {
   const shiftDate = (days) => {
     const d = new Date(selectedDate + 'T12:00:00');
     d.setDate(d.getDate() + days);
-    const next = toDateStr(d);
+    const next = getLocalDateStr(d);
     if (next <= today) setSelectedDate(next);
   };
 
