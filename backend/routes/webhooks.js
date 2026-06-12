@@ -4,6 +4,8 @@ const db = require('../db');
 const fs = require('fs');
 const path = require('path');
 const Fuse = require('fuse.js');
+const { createCheckoutSession } = require('../services/stripeService');
+const { sendPaymentRequestSms } = require('../services/smsService');
 
 // Middleware to verify admin permission
 const requireAdmin = (req, res, next) => {
@@ -453,9 +455,67 @@ module.exports = (io) => {
                 }
               }
 
-              // Emit Socket Event for Real-Time Sync
-              io.emit('new_order', newOrder);
-              console.log('Successfully processed Vapi order:', callId);
+              // ── Payment Threshold Check ──────────────────────────────────
+              // Fetch the configured payment threshold from app_settings (or env fallback)
+              let paymentThreshold = parseFloat(process.env.PAYMENT_THRESHOLD || '50');
+              try {
+                const thresholdResult = await db.query(
+                  "SELECT value FROM app_settings WHERE key = 'payment_threshold'"
+                );
+                if (thresholdResult.rows.length > 0) {
+                  const raw = thresholdResult.rows[0].value;
+                  const parsed = parseFloat(typeof raw === 'string' ? raw : JSON.stringify(raw));
+                  if (!isNaN(parsed)) paymentThreshold = parsed;
+                }
+              } catch (e) {
+                console.warn('[VAPI] Could not read payment_threshold from app_settings, using default:', paymentThreshold);
+              }
+
+              const orderTotal = parseFloat(order.total || 0);
+              const requiresPayment = orderTotal >= paymentThreshold && !isCallerFlagged;
+
+              if (requiresPayment) {
+                // Update status to PENDING_PAYMENT
+                await db.query(
+                  "UPDATE orders SET status = 'PENDING_PAYMENT', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+                  [newOrder.id]
+                );
+                newOrder.status = 'PENDING_PAYMENT';
+
+                // Create Stripe Checkout Session
+                let paymentUrl = null;
+                try {
+                  paymentUrl = await createCheckoutSession(newOrder, newOrder.lines);
+                  console.log(`[Payment] Stripe session created for order #${newOrder.daily_order_code}: ${paymentUrl}`);
+                } catch (stripeErr) {
+                  console.error('[Payment] Stripe session creation failed:', stripeErr.message);
+                  // Fallback: let the order proceed as normal PENDING so kitchen isn't blocked
+                  await db.query(
+                    "UPDATE orders SET status = 'PENDING', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+                    [newOrder.id]
+                  );
+                  newOrder.status = 'PENDING';
+                }
+
+                // Send SMS with payment link
+                if (paymentUrl && customer?.phone && customer.phone !== 'Unknown') {
+                  try {
+                    await sendPaymentRequestSms(customer.phone, newOrder, paymentUrl);
+                  } catch (smsErr) {
+                    console.error('[SMS] Failed to send payment SMS:', smsErr.message);
+                    // Non-fatal — order still exists in PENDING_PAYMENT
+                  }
+                }
+
+                // Emit socket event so the Pending Payments tab updates in real-time
+                io.emit('new_order', newOrder);
+                console.log(`[Payment] Order #${newOrder.daily_order_code} awaiting payment ($${orderTotal.toFixed(2)} >= threshold $${paymentThreshold}). SMS sent.`);
+              } else {
+                // Standard flow — emit new_order for kitchen
+                io.emit('new_order', newOrder);
+                console.log('Successfully processed Vapi order:', callId);
+              }
+              // ────────────────────────────────────────────────────────────
               
             } catch (err) {
               console.error('Async order processing failed:', err);

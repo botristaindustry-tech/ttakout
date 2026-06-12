@@ -48,6 +48,7 @@ export default function IngestionDashboard() {
 
   const pendingOrders = orders.filter(o => o.status === 'PENDING');
   const flaggedOrders = orders.filter(o => o.status === 'FLAGGED');
+  const pendingPaymentOrders = orders.filter(o => o.status === 'PENDING_PAYMENT');
   const archivedOrders = orders.filter(o => ['REJECTED', 'PAID'].includes(o.status));
 
   const playAlert = useCallback((volume, message) => {
@@ -164,6 +165,15 @@ export default function IngestionDashboard() {
               {pendingOrders.length > 0 && <span className="tab-count">{pendingOrders.length}</span>}
             </button>
             <button 
+              className={`tab-btn ${activeTab === 'awaiting-payment' ? 'active' : ''}`}
+              onClick={() => setActiveTab('awaiting-payment')}
+              style={{ borderColor: activeTab === 'awaiting-payment' ? '#f59e0b' : undefined }}
+            >
+              <span className="tab-dot" style={{ background: '#f59e0b' }}></span>
+              Awaiting Payment
+              {pendingPaymentOrders.length > 0 && <span className="tab-count" style={{ background: '#f59e0b' }}>{pendingPaymentOrders.length}</span>}
+            </button>
+            <button 
               className={`tab-btn ${activeTab === 'flagged' ? 'active' : ''}`}
               onClick={() => setActiveTab('flagged')}
             >
@@ -244,6 +254,52 @@ export default function IngestionDashboard() {
               <p>No incoming orders. Pipeline is clear.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'awaiting-payment' && (
+        <div className="archive-table-wrapper glass-panel">
+          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', background: 'rgba(245, 158, 11, 0.05)', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}>
+            <p style={{ color: '#f59e0b', fontSize: '0.85rem', margin: 0 }}>⏳ These orders exceed the payment threshold. An SMS with a Stripe payment link was sent to the customer. They will appear in the Incoming Queue once payment is confirmed.</p>
+          </div>
+          <table className="archive-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Total</th>
+                <th>Placed At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingPaymentOrders.map(order => (
+                <tr 
+                  key={order.id} 
+                  onClick={() => setSelectedOrder(order)} 
+                  style={{ cursor: 'pointer' }}
+                  title="Click to view details"
+                >
+                  <td style={{ color: '#f59e0b', fontWeight: 600 }}>#{order.daily_order_code || order.id.slice(0,8)}</td>
+                  <td>{order.customer_name}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{formatPhone(order.customer_phone)}</td>
+                  <td style={{ fontWeight: 600, color: '#f59e0b' }}>${Number(order.total || 0).toFixed(2)}</td>
+                  <td>
+                    {new Date(order.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </td>
+                  <td><span style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600 }}>💳 AWAITING PAYMENT</span></td>
+                </tr>
+              ))}
+              {pendingPaymentOrders.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    No orders awaiting payment.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 

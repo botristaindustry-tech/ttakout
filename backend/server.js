@@ -28,7 +28,18 @@ app.use(cors({
   credentials: true
 }));
 app.use(morgan('dev'));
-app.use(express.json());
+
+// Capture raw body for Stripe webhook signature verification (MUST be before express.json())
+app.use('/api/v1/payments/stripe-webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  req.rawBody = req.body;
+  next();
+});
+
+// Standard JSON parser for all other routes
+app.use((req, res, next) => {
+  if (req.path === '/api/v1/payments/stripe-webhook') return next();
+  express.json()(req, res, next);
+});
 
 // Trust proxy (Render runs behind a reverse proxy)
 app.set('trust proxy', 1);
@@ -127,6 +138,7 @@ const rolesRoutes = require('./routes/roles');
 const settingsRoutes = require('./routes/settings');
 const flaggedPhonesRoutes = require('./routes/flaggedPhones');
 const menuRoutes = require('./routes/menu');
+const paymentsRoutes = require('./routes/payments')(io);
 
 app.use('/auth', authRoutes);
 app.use('/api/v1/webhooks', webhooksRoutes);
@@ -136,6 +148,7 @@ app.use('/api/v1/roles', rolesRoutes);
 app.use('/api/v1/settings', settingsRoutes);
 app.use('/api/v1/flagged-phones', flaggedPhonesRoutes);
 app.use('/api/v1/menu', menuRoutes);
+app.use('/api/v1/payments', paymentsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -163,10 +176,10 @@ db.query('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check')
   .then(() => console.log('Successfully ensured dynamic roles are allowed (dropped users_role_check).'))
   .catch(err => console.error('Error dropping users_role_check constraint:', err));
 
-// Drop and recreate restrictive orders status constraint to allow FLAGGED status
+// Drop and recreate restrictive orders status constraint to allow FLAGGED + PENDING_PAYMENT statuses
 db.query('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check')
-  .then(() => db.query("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('PENDING', 'KITCHEN_QUEUED', 'REJECTED', 'READY_FOR_PICKUP', 'PAID', 'FLAGGED'))"))
-  .then(() => console.log("Successfully ensured FLAGGED order status is allowed."))
+  .then(() => db.query("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('PENDING', 'KITCHEN_QUEUED', 'REJECTED', 'READY_FOR_PICKUP', 'PAID', 'FLAGGED', 'PENDING_PAYMENT'))"))
+  .then(() => console.log("Successfully ensured FLAGGED and PENDING_PAYMENT order statuses are allowed."))
   .catch(err => console.error("Error updating orders_status_check constraint:", err));
 
 server.listen(PORT, () => {

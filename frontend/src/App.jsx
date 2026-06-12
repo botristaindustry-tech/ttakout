@@ -13,6 +13,7 @@ import FlaggedPhones from './pages/FlaggedPhones';
 import MenuManager from './pages/MenuManager';
 import AdminVapiSetup from './components/AdminVapiSetup';
 import AdminVapiBilling from './components/AdminVapiBilling';
+import AdminPaymentSettings from './components/AdminPaymentSettings';
 
 function ProtectedRoute({ user, requiredPermission, children, fallback }) {
   const perms = user?.permissions || [];
@@ -152,6 +153,13 @@ function SidebarDrawer({ isOpen, onClose, user }) {
                         onClick={handleNav}
                       >
                         VAPI Billing & Logs
+                      </Link>
+                      <Link
+                        to="/admin/settings/payments"
+                        className={`sidebar-item sub ${isActive('/admin/settings/payments') ? 'active' : ''}`}
+                        onClick={handleNav}
+                      >
+                        💳 Payment Settings
                       </Link>
                     </>
                   )}
@@ -309,6 +317,11 @@ function App() {
                       <Route path="/admin/settings/vapi-billing" element={
                         <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
                           <AdminVapiBilling />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/settings/payments" element={
+                        <ProtectedRoute user={user} requiredPermission="manage_kds" fallback="/kds">
+                          <AdminPaymentSettings />
                         </ProtectedRoute>
                       } />
                       <Route path="/admin/dashboard" element={
