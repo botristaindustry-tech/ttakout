@@ -20,7 +20,14 @@ async function getVapiConfig() {
     active_menu_file: 'menu.json'
   };
   result.rows.forEach(row => {
-    if (row.value) config[row.key] = row.value;
+    if (row.value) {
+      // Strip JSON-stringified quotes if present (e.g. '"sk-abc"' → 'sk-abc')
+      let val = row.value;
+      if (typeof val === 'string' && val.startsWith('"') && val.endsWith('"')) {
+        try { val = JSON.parse(val); } catch (_) {}
+      }
+      config[row.key] = val;
+    }
   });
   return config;
 }
@@ -95,19 +102,13 @@ router.get('/vapi/prompt', requireAdmin, async (req, res) => {
 // Check our internal VAPI account credit balance
 router.get('/vapi/credits', requireAdmin, async (req, res) => {
   try {
-    const config = await getVapiConfig();
-    const vapiApiKey = config.vapi_api_key;
-
-    if (!vapiApiKey) {
-      return res.json({ configured: false, error: 'VAPI API Key is not configured.' });
-    }
-
     const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'vapi_credit_balance'");
     const balance = rows.length > 0 ? parseFloat(rows[0].value) : 0;
 
+    const config = await getVapiConfig();
     return res.json({
-      configured: true,
-      balance: balance,
+      configured: !!config.vapi_api_key,
+      balance: isNaN(balance) ? 0 : balance,
       plan: 'Internal Tracking',
       orgName: 'TTAKOUT',
       lowCredit: balance < 8
@@ -123,29 +124,29 @@ router.get('/vapi/credits', requireAdmin, async (req, res) => {
 // Refill or set the internal credit budget
 router.post('/vapi/credits/refill', requireAdmin, async (req, res) => {
   try {
-    const { amount, mode } = req.body; // mode: 'add' or 'set'
+    const { amount, mode } = req.body;
     const value = parseFloat(amount) || 0;
-    
+
     if (mode === 'add') {
       await pool.query(`
         INSERT INTO app_settings (key, value) 
-        VALUES ('vapi_credit_balance', $1)
+        VALUES ('vapi_credit_balance', $1::jsonb)
         ON CONFLICT (key) DO UPDATE 
-        SET value = (COALESCE(app_settings.value::numeric, 0) + $1)::text
+        SET value = to_jsonb(COALESCE((app_settings.value)::text::numeric, 0) + $1)
       `, [value]);
     } else {
       await pool.query(`
         INSERT INTO app_settings (key, value) 
-        VALUES ('vapi_credit_balance', $1)
+        VALUES ('vapi_credit_balance', $1::jsonb)
         ON CONFLICT (key) DO UPDATE 
         SET value = EXCLUDED.value
-      `, [value.toString()]);
+      `, [value]);
     }
 
     res.json({ success: true });
   } catch (err) {
     console.error('Error refilling budget:', err);
-    res.status(500).json({ error: 'Failed to refill budget' });
+    res.status(500).json({ error: `Failed to refill budget: ${err.message}` });
   }
 });
 
@@ -267,7 +268,7 @@ router.post('/vapi/calls/sync', requireAdmin, async (req, res) => {
     if (totalNewCost > 0) {
       await pool.query(`
         UPDATE app_settings 
-        SET value = (COALESCE(value::numeric, 0) - $1)::text
+        SET value = to_jsonb(COALESCE((value)::text::numeric, 0) - $1)
         WHERE key = 'vapi_credit_balance'
       `, [totalNewCost]);
     }
@@ -283,7 +284,7 @@ router.post('/vapi/calls/sync', requireAdmin, async (req, res) => {
 
   } catch (err) {
     console.error('Error syncing VAPI calls:', err);
-    res.status(500).json({ error: 'Failed to sync calls from VAPI' });
+    res.status(500).json({ error: `Sync error: ${err.message}` });
   }
 });
 

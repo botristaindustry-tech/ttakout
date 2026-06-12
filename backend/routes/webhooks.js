@@ -103,10 +103,10 @@ module.exports = (io) => {
               [callId, cost, endedReason]
             );
 
-            // Decrement the credit balance safely in app_settings
+            // Decrement the credit balance safely in app_settings (value column is jsonb)
             await db.query(`
               UPDATE app_settings 
-              SET value = (COALESCE(value::numeric, 0) - $1)::text 
+              SET value = to_jsonb(COALESCE((value)::text::numeric, 0) - $1)
               WHERE key = 'vapi_credit_balance'
             `, [cost]);
 
