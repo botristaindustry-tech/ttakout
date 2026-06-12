@@ -150,30 +150,66 @@ router.post('/vapi/credits/refill', requireAdmin, async (req, res) => {
 });
 
 // GET /api/v1/settings/vapi/calls
-// Get history of vapi calls and total spend
+// Get history of vapi calls for a specific date, plus total spend
 router.get('/vapi/calls', requireAdmin, async (req, res) => {
   try {
+    // date param e.g. "2026-06-11" — defaults to today
+    const dateParam = req.query.date;
+    const targetDate = dateParam ? new Date(dateParam + 'T00:00:00') : new Date();
+    const dateStr = targetDate.toISOString().split('T')[0];
+
     const { rows: calls } = await pool.query(`
       SELECT call_id, cost, ended_reason, created_at 
       FROM vapi_calls 
-      ORDER BY created_at DESC 
-      LIMIT 100
-    `);
+      WHERE created_at::date = $1::date
+      ORDER BY created_at DESC
+    `, [dateStr]);
     
     const { rows: totalRows } = await pool.query(`
       SELECT SUM(cost) as total_spend 
       FROM vapi_calls
     `);
 
+    const { rows: dayTotalRows } = await pool.query(`
+      SELECT SUM(cost) as day_spend, COUNT(*) as day_calls
+      FROM vapi_calls
+      WHERE created_at::date = $1::date
+    `, [dateStr]);
+
     res.json({
+      date: dateStr,
       calls,
-      totalSpend: parseFloat(totalRows[0]?.total_spend || 0)
+      totalSpend: parseFloat(totalRows[0]?.total_spend || 0),
+      daySpend: parseFloat(dayTotalRows[0]?.day_spend || 0),
+      dayCallCount: parseInt(dayTotalRows[0]?.day_calls || 0)
     });
   } catch (err) {
     console.error('Error fetching VAPI calls:', err);
     res.status(500).json({ error: 'Failed to fetch call history' });
   }
 });
+
+// GET /api/v1/settings/vapi/calls/daily
+// Get daily aggregated call counts and costs for bar charts (last 30 days)
+router.get('/vapi/calls/daily', requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+        created_at::date AS day,
+        COUNT(*)::int AS call_count,
+        COALESCE(SUM(cost), 0)::float AS total_cost
+      FROM vapi_calls
+      WHERE created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY created_at::date
+      ORDER BY day ASC
+    `);
+    res.json({ daily: rows });
+  } catch (err) {
+    console.error('Error fetching daily VAPI stats:', err);
+    res.status(500).json({ error: 'Failed to fetch daily stats' });
+  }
+});
+
 
 // POST /api/v1/settings/vapi/config
 // Update just the API key, assistant ID, and menu file
