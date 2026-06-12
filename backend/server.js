@@ -211,6 +211,11 @@ db.query('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check')
   .then(() => console.log("Successfully ensured FLAGGED and PENDING_PAYMENT order statuses are allowed."))
   .catch(err => console.error("Error updating orders_status_check constraint:", err));
 
+// Ensure payment_url column exists
+db.query('ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_url TEXT')
+  .then(() => console.log("Successfully ensured payment_url column exists on orders table."))
+  .catch(err => console.error("Error adding payment_url column:", err));
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   
