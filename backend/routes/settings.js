@@ -162,7 +162,7 @@ router.get('/vapi/calls', requireAdmin, async (req, res) => {
     const { rows: calls } = await pool.query(`
       SELECT call_id, cost, ended_reason, created_at 
       FROM vapi_calls 
-      WHERE (created_at AT TIME ZONE 'America/New_York')::date = $1::date
+      WHERE (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York')::date = $1::date
       ORDER BY created_at DESC
     `, [dateStr]);
     
@@ -174,7 +174,7 @@ router.get('/vapi/calls', requireAdmin, async (req, res) => {
     const { rows: dayTotalRows } = await pool.query(`
       SELECT SUM(cost) as day_spend, COUNT(*) as day_calls
       FROM vapi_calls
-      WHERE (created_at AT TIME ZONE 'America/New_York')::date = $1::date
+      WHERE (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York')::date = $1::date
     `, [dateStr]);
 
     res.json({
@@ -196,12 +196,12 @@ router.get('/vapi/calls/daily', requireAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT 
-        (created_at AT TIME ZONE 'America/New_York')::date AS day,
+        (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York')::date AS day,
         COUNT(*)::int AS call_count,
         COALESCE(SUM(cost), 0)::float AS total_cost
       FROM vapi_calls
       WHERE created_at >= NOW() - INTERVAL '30 days'
-      GROUP BY (created_at AT TIME ZONE 'America/New_York')::date
+      GROUP BY (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York')::date
       ORDER BY day ASC
     `);
     res.json({ daily: rows });
