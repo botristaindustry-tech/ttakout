@@ -368,159 +368,166 @@ module.exports = (io) => {
             continue;
           }
 
-          // Respond immediately with the proper shape
-          results.push({ toolCallId, result: { ok: true, received: true, callId } });
+          try {
+            if (!order || !callId) {
+               console.error('Invalid payload structure: missing order or callId');
+               results.push({ toolCallId, result: { ok: false, error: 'Invalid payload structure' } });
+               continue;
+            }
 
-          // Do async processing AFTER responding so Vapi doesn't timeout
-          setImmediate(async () => {
-            try {
-              if (!order || !callId) {
-                 console.error('Invalid payload structure: missing order or callId');
-                 return;
-              }
+            // Check if phone number is flagged using digits normalization (comparing last 10 digits)
+            const flaggedCheckBefore = await db.query(`
+              SELECT 1 FROM flagged_phones 
+              WHERE LENGTH(regexp_replace($1, '[^0-9]', '', 'g')) >= 7
+                AND RIGHT(regexp_replace(phone_number, '[^0-9]', '', 'g'), 10) = RIGHT(regexp_replace($1, '[^0-9]', '', 'g'), 10)
+            `, [customer?.phone || 'Unknown']);
+            const isCallerFlagged = flaggedCheckBefore.rows.length > 0;
+            const initialStatus = isCallerFlagged ? 'FLAGGED' : 'PENDING';
 
-              // Check if phone number is flagged using digits normalization (comparing last 10 digits)
-              const flaggedCheckBefore = await db.query(`
-                SELECT 1 FROM flagged_phones 
-                WHERE LENGTH(regexp_replace($1, '[^0-9]', '', 'g')) >= 7
-                  AND RIGHT(regexp_replace(phone_number, '[^0-9]', '', 'g'), 10) = RIGHT(regexp_replace($1, '[^0-9]', '', 'g'), 10)
-              `, [customer?.phone || 'Unknown']);
-              const isCallerFlagged = flaggedCheckBefore.rows.length > 0;
-              const initialStatus = isCallerFlagged ? 'FLAGGED' : 'PENDING';
+            // Persist Order to DB
+            const insertOrderQuery = `
+              INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (
+                SELECT COALESCE(MAX(daily_order_code), 0) + 1 FROM orders WHERE created_at::date = CURRENT_DATE
+              ))
+              RETURNING *;
+            `;
+            const orderValues = [
+              callId,
+              restaurant || 'Unknown',
+              customer?.name || 'Unknown',
+              customer?.phone || 'Unknown',
+              order.subtotal || 0,
+              order.taxRate || 0,
+              order.tax || 0,
+              order.total || 0,
+              order.pickupEtaMinutes || 0,
+              notes || '',
+              initialStatus
+            ];
 
-              // Persist Order to DB
-              const insertOrderQuery = `
-                INSERT INTO orders (vapi_call_id, restaurant_name, customer_name, customer_phone, subtotal, tax_rate, tax, total, pickup_eta_minutes, notes, status, daily_order_code)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (
-                  SELECT COALESCE(MAX(daily_order_code), 0) + 1 FROM orders WHERE created_at::date = CURRENT_DATE
-                ))
-                RETURNING *;
-              `;
-              const orderValues = [
-                callId,
-                restaurant || 'Unknown',
-                customer?.name || 'Unknown',
-                customer?.phone || 'Unknown',
-                order.subtotal || 0,
-                order.taxRate || 0,
-                order.tax || 0,
-                order.total || 0,
-                order.pickupEtaMinutes || 0,
-                notes || '',
-                initialStatus
-              ];
+            const { rows } = await db.query(insertOrderQuery, orderValues);
+            const newOrder = rows[0];
+            newOrder.is_flagged = isCallerFlagged;
+            newOrder.lines = [];
 
-              const { rows } = await db.query(insertOrderQuery, orderValues);
-              const newOrder = rows[0];
-              newOrder.is_flagged = isCallerFlagged;
-              newOrder.lines = [];
+            // Insert Order Lines and Modifiers
+            if (order.lines && Array.isArray(order.lines)) {
+              for (const line of order.lines) {
+                const insertLineQuery = `
+                  INSERT INTO order_lines (order_id, line_id, item_id, name, quantity, line_subtotal)
+                  VALUES ($1, $2, $3, $4, $5, $6)
+                  RETURNING *;
+                `;
+                const lineValues = [
+                  newOrder.id, 
+                  line.lineId || `line-${Date.now()}-${Math.random()}`, 
+                  line.itemId || 'unknown', 
+                  line.name, 
+                  line.quantity, 
+                  line.lineSubtotal || 0
+                ];
+                const lineRes = await db.query(insertLineQuery, lineValues);
+                const newLine = lineRes.rows[0];
+                newLine.modifiers = [];
 
-              // Insert Order Lines and Modifiers
-              if (order.lines && Array.isArray(order.lines)) {
-                for (const line of order.lines) {
-                  const insertLineQuery = `
-                    INSERT INTO order_lines (order_id, line_id, item_id, name, quantity, line_subtotal)
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    RETURNING *;
-                  `;
-                  const lineValues = [
-                    newOrder.id, 
-                    line.lineId || `line-${Date.now()}-${Math.random()}`, 
-                    line.itemId || 'unknown', 
-                    line.name, 
-                    line.quantity, 
-                    line.lineSubtotal || 0
-                  ];
-                  const lineRes = await db.query(insertLineQuery, lineValues);
-                  const newLine = lineRes.rows[0];
-                  newLine.modifiers = [];
-
-                  if (line.modifiers && Array.isArray(line.modifiers)) {
-                    for (const mod of line.modifiers) {
-                      const insertModQuery = `
-                        INSERT INTO order_modifiers (order_line_id, name, option_name, price)
-                        VALUES ($1, $2, $3, $4)
-                        RETURNING *;
-                      `;
-                      const modRes = await db.query(insertModQuery, [
-                        newLine.id, 
-                        mod.name, 
-                        mod.option || mod.option_name, 
-                        mod.price || 0
-                      ]);
-                      newLine.modifiers.push(modRes.rows[0]);
-                    }
+                if (line.modifiers && Array.isArray(line.modifiers)) {
+                  for (const mod of line.modifiers) {
+                    const insertModQuery = `
+                      INSERT INTO order_modifiers (order_line_id, name, option_name, price)
+                      VALUES ($1, $2, $3, $4)
+                      RETURNING *;
+                    `;
+                    const modRes = await db.query(insertModQuery, [
+                      newLine.id, 
+                      mod.name, 
+                      mod.option || mod.option_name, 
+                      mod.price || 0
+                    ]);
+                    newLine.modifiers.push(modRes.rows[0]);
                   }
-                  newOrder.lines.push(newLine);
                 }
+                newOrder.lines.push(newLine);
               }
+            }
 
-              // ── Payment Threshold Check ──────────────────────────────────
-              // Fetch the configured payment threshold from app_settings (or env fallback)
-              let paymentThreshold = parseFloat(process.env.PAYMENT_THRESHOLD || '50');
+            // ── Payment Threshold Check ──────────────────────────────────
+            // Fetch the configured payment threshold from app_settings (or env fallback)
+            let paymentThreshold = parseFloat(process.env.PAYMENT_THRESHOLD || '50');
+            try {
+              const thresholdResult = await db.query(
+                "SELECT value FROM app_settings WHERE key = 'payment_threshold'"
+              );
+              if (thresholdResult.rows.length > 0) {
+                const raw = thresholdResult.rows[0].value;
+                const parsed = parseFloat(typeof raw === 'string' ? raw : JSON.stringify(raw));
+                if (!isNaN(parsed)) paymentThreshold = parsed;
+              }
+            } catch (e) {
+              console.warn('[VAPI] Could not read payment_threshold from app_settings, using default:', paymentThreshold);
+            }
+
+            const orderTotal = parseFloat(order.total || 0);
+            const requiresPayment = orderTotal >= paymentThreshold && !isCallerFlagged;
+
+            if (requiresPayment) {
+              // Update status to PENDING_PAYMENT
+              await db.query(
+                "UPDATE orders SET status = 'PENDING_PAYMENT', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+                [newOrder.id]
+              );
+              newOrder.status = 'PENDING_PAYMENT';
+
+              // Create Stripe Checkout Session
+              let paymentUrl = null;
               try {
-                const thresholdResult = await db.query(
-                  "SELECT value FROM app_settings WHERE key = 'payment_threshold'"
-                );
-                if (thresholdResult.rows.length > 0) {
-                  const raw = thresholdResult.rows[0].value;
-                  const parsed = parseFloat(typeof raw === 'string' ? raw : JSON.stringify(raw));
-                  if (!isNaN(parsed)) paymentThreshold = parsed;
-                }
-              } catch (e) {
-                console.warn('[VAPI] Could not read payment_threshold from app_settings, using default:', paymentThreshold);
-              }
-
-              const orderTotal = parseFloat(order.total || 0);
-              const requiresPayment = orderTotal >= paymentThreshold && !isCallerFlagged;
-
-              if (requiresPayment) {
-                // Update status to PENDING_PAYMENT
+                paymentUrl = await createCheckoutSession(newOrder, newOrder.lines);
+                console.log(`[Payment] Stripe session created for order #${newOrder.daily_order_code}: ${paymentUrl}`);
+              } catch (stripeErr) {
+                console.error('[Payment] Stripe session creation failed:', stripeErr.message);
+                // Fallback: let the order proceed as normal PENDING so kitchen isn't blocked
                 await db.query(
-                  "UPDATE orders SET status = 'PENDING_PAYMENT', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+                  "UPDATE orders SET status = 'PENDING', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
                   [newOrder.id]
                 );
-                newOrder.status = 'PENDING_PAYMENT';
-
-                // Create Stripe Checkout Session
-                let paymentUrl = null;
-                try {
-                  paymentUrl = await createCheckoutSession(newOrder, newOrder.lines);
-                  console.log(`[Payment] Stripe session created for order #${newOrder.daily_order_code}: ${paymentUrl}`);
-                } catch (stripeErr) {
-                  console.error('[Payment] Stripe session creation failed:', stripeErr.message);
-                  // Fallback: let the order proceed as normal PENDING so kitchen isn't blocked
-                  await db.query(
-                    "UPDATE orders SET status = 'PENDING', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-                    [newOrder.id]
-                  );
-                  newOrder.status = 'PENDING';
-                }
-
-                // Send SMS with payment link
-                if (paymentUrl && customer?.phone && customer.phone !== 'Unknown') {
-                  try {
-                    await sendPaymentRequestSms(customer.phone, newOrder, paymentUrl);
-                  } catch (smsErr) {
-                    console.error('[SMS] Failed to send payment SMS:', smsErr.message);
-                    // Non-fatal — order still exists in PENDING_PAYMENT
-                  }
-                }
-
-                // Emit socket event so the Pending Payments tab updates in real-time
-                io.emit('new_order', newOrder);
-                console.log(`[Payment] Order #${newOrder.daily_order_code} awaiting payment ($${orderTotal.toFixed(2)} >= threshold $${paymentThreshold}). SMS sent.`);
-              } else {
-                // Standard flow — emit new_order for kitchen
-                io.emit('new_order', newOrder);
-                console.log('Successfully processed Vapi order:', callId);
+                newOrder.status = 'PENDING';
               }
-              // ────────────────────────────────────────────────────────────
-              
-            } catch (err) {
-              console.error('Async order processing failed:', err);
+
+              // Send SMS with payment link
+              if (paymentUrl && customer?.phone && customer.phone !== 'Unknown') {
+                try {
+                  await sendPaymentRequestSms(customer.phone, newOrder, paymentUrl);
+                } catch (smsErr) {
+                  console.error('[SMS] Failed to send payment SMS:', smsErr.message);
+                  // Non-fatal — order still exists in PENDING_PAYMENT
+                }
+              }
+
+              // Emit socket event so the Pending Payments tab updates in real-time
+              io.emit('new_order', newOrder);
+              console.log(`[Payment] Order #${newOrder.daily_order_code} awaiting payment ($${orderTotal.toFixed(2)} >= threshold $${paymentThreshold}). SMS sent.`);
+            } else {
+              // Standard flow — emit new_order for kitchen
+              io.emit('new_order', newOrder);
+              console.log('Successfully processed Vapi order:', callId);
             }
-          });
+            // ────────────────────────────────────────────────────────────
+            
+            // Return exactly what the user asked for back to Vapi
+            results.push({ 
+              toolCallId, 
+              result: { 
+                success: true,
+                orderId: String(newOrder.daily_order_code),
+                total: orderTotal,
+                smsPaymentLinkSent: requiresPayment
+              } 
+            });
+
+          } catch (err) {
+            console.error('Order processing failed:', err);
+            results.push({ toolCallId, result: { ok: false, error: 'Internal server error while processing order' } });
+          }
           continue;
         }
 
