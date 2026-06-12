@@ -469,6 +469,7 @@ module.exports = (io) => {
 
             const orderTotal = parseFloat(order.total || 0);
             const requiresPayment = orderTotal >= paymentThreshold && !isCallerFlagged;
+            let paymentUrl = null;
 
             if (requiresPayment) {
               // Update status to PENDING_PAYMENT
@@ -479,7 +480,6 @@ module.exports = (io) => {
               newOrder.status = 'PENDING_PAYMENT';
 
               // Create Stripe Checkout Session
-              let paymentUrl = null;
               try {
                 paymentUrl = await createCheckoutSession(newOrder, newOrder.lines);
                 console.log(`[Payment] Stripe session created for order #${newOrder.daily_order_code}: ${paymentUrl}`);
@@ -520,7 +520,8 @@ module.exports = (io) => {
                 success: true,
                 orderId: String(newOrder.daily_order_code),
                 total: orderTotal,
-                smsPaymentLinkSent: requiresPayment
+                smsPaymentLinkSent: requiresPayment,
+                paymentUrl: paymentUrl || undefined
               } 
             });
 
