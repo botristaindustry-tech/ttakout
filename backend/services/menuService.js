@@ -85,7 +85,7 @@ class MenuService {
     }
     const filePath = path.join(__dirname, '../data', path.basename(filename));
     fs.writeFileSync(filePath, JSON.stringify(newMenu, null, 2), 'utf-8');
-    if (filename === 'menu.json') {
+    if (filename === this.activeMenuFile) {
       this.loadMenu(); // Refresh if active menu is updated
     }
   }

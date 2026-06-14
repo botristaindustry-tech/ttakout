@@ -17,6 +17,7 @@ export default function MenuManager() {
   // File selection state
   const [menuFiles, setMenuFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState('menu.json');
+  const [activeMenuFile, setActiveMenuFile] = useState('menu.json');
 
   useEffect(() => {
     fetchMenuFiles();
@@ -33,15 +34,53 @@ export default function MenuManager() {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/menu/files`, {
         credentials: 'include'
       });
+      const settingsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/settings`, {
+        credentials: 'include'
+      });
+
       if (res.ok) {
         const data = await res.json();
         setMenuFiles(data);
-        if (data.length > 0 && !data.includes(selectedFile)) {
+        
+        let activeFile = 'menu.json';
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          activeFile = settingsData.active_menu_file || 'menu.json';
+          if (typeof activeFile === 'string' && activeFile.startsWith('"')) {
+            try { activeFile = JSON.parse(activeFile); } catch (e) {}
+          }
+          setActiveMenuFile(activeFile);
+        }
+
+        if (data.includes(activeFile)) {
+          setSelectedFile(activeFile);
+        } else if (data.length > 0 && !data.includes(selectedFile)) {
           setSelectedFile(data[0]);
         }
       }
     } catch (err) {
-      console.error('Error fetching menu files:', err);
+      console.error('Error fetching menu files or settings:', err);
+    }
+  };
+
+  const handleSetActiveMenu = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5005'}/api/v1/settings/vapi/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ active_menu_file: selectedFile })
+      });
+      if (res.ok) {
+        setActiveMenuFile(selectedFile);
+        setMessage({ text: `${selectedFile} is now the active menu!`, type: 'success' });
+        setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+      } else {
+        setMessage({ text: 'Failed to set active menu.', type: 'error' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ text: 'Network error setting active menu.', type: 'error' });
     }
   };
 
@@ -196,6 +235,17 @@ export default function MenuManager() {
               {menuFiles.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
             <button className="btn btn-outline" onClick={handleCreateNewFile}>+ New File</button>
+            
+            {activeMenuFile === selectedFile ? (
+              <span style={{ marginLeft: '1rem', color: 'var(--status-normal)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '0.5rem', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                ACTIVE
+              </span>
+            ) : (
+              <button className="btn btn-primary" style={{ marginLeft: '1rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }} onClick={handleSetActiveMenu}>
+                Set as Active
+              </button>
+            )}
           </div>
           <button className="btn btn-outline" onClick={handleAddCategory} disabled={!menu}>+ New Category</button>
           <button className="btn btn-primary" onClick={() => saveMenu(menu)} disabled={saving || !menu}>
